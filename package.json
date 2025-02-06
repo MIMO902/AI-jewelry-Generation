@@ -1,0 +1,32 @@
+{
+  "name": "AI-Jewlery_generation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "nodemon ./bin/www",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "ajax": "^0.0.4",
+    "bcrypt": "^5.1.0",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.0.3",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.4.0",
+    "express-session": "^1.17.3",
+    "express-validator": "^7.0.1",
+    "http-errors": "^2.0.0",
+    "mongodb": "^5.5.0",
+    "mongoose": "^7.2.1",
+    "morgan": "^1.10.0",
+    "nodemailer": "^6.9.3",
+    "socket.io": "^4.6.2",
+    "socket.io-client": "^4.6.2"
+  }
+}
