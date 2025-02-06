@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JewelryGen Sign Up</title>
     <link rel="stylesheet" href="/css/login.css">
+    <script>
+      function validate() {
+        if (document.getElementById('unresult').innerHTML.includes('taken'))
+          return false;
+        else
+          return true;
+      }
+    </script>
 </head>
 <body>
     <div class="login-container">
@@ -13,7 +21,16 @@
             <span>JewelryGen</span>
         </div>
         <form action="/signup-action" method="post">
-            <!-- First Name and Last Name on the same line -->
+          <% if (errors && errors.length> 0) { %>
+            <div class="error-box">
+              <% for (let i=0; i < errors.length; i++) { %>
+                <p>
+                  <%= errors[i].msg %>
+                </p>
+                <% } %>
+            </div>
+            <% } %>  
+          <!-- First Name and Last Name on the same line -->
             <div class=" name-group">
                 <div class="input-field">
                     <label for="firstname">First Name</label>
@@ -29,12 +46,16 @@
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" name="username" id="username" placeholder="Choose a username" required>
+                <span id="unresult"></span>
             </div>
 
             <div class="input-group">
                 <label for="email">Email</label>
                 <input type="email" name="email" id="email" placeholder="Enter your email" required>
+                <span id="emailresult"></span>
             </div>
+
+            <input type="hidden" name="type" value="user">
 
             <div class="input-group">
                 <label for="password">Password</label>
@@ -43,7 +64,7 @@
 
             <div class="input-group">
                 <label for="confirmpassword">Confirm Password</label>
-                <input type="password" name="confirmpassword" id="confirmpassword" placeholder="Confirm your password" required>
+                <input type="password" name="confirmPassword" id="confirmpassword" placeholder="Confirm your password" required>
             </div>
 
             <div class="btn-container">
