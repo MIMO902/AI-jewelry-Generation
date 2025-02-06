@@ -81,11 +81,20 @@ const login = async (req, res, next) => {
       }
     }else{
       console.log("password is not correct");
-      res.send("password is not correct");
+      errors=["wrong password"]
+    res.render("pages/login", {
+      title: "login page - Validation Failed",
+      errors: errors.array(),
+    });
     }
   }else{
     console.log("username does not exists");
-     res.send("username does not exists");
+    errors=["username does not exists"]
+    res.render("pages/login", {
+      title: "login page - Validation Failed",
+      errors: errors.array(),
+    });
+    return;
   }
 
 };
