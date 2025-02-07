@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JewelryGen Sign Up</title>
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <span>&#128142;</span>
+            <span>JewelryGen</span>
+        </div>
+        <form action="/signup-action" method="post">
+            <!-- First Name and Last Name on the same line -->
+            <div class=" name-group">
+                <div class="input-field">
+                    <label for="firstname">First Name</label>
+                    <input type="text" name="firstname" id="firstname" placeholder="Enter your first name" required>
+                </div>
+
+                <div class="input-field">
+                    <label for="lastname">Last Name</label>
+                    <input type="text" name="lastname" id="lastname" placeholder="Enter your last name" required>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" placeholder="Choose a username" required>
+            </div>
+
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" placeholder="Enter your email" required>
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" placeholder="Enter your password" required>
+            </div>
+
+            <div class="input-group">
+                <label for="confirmpassword">Confirm Password</label>
+                <input type="password" name="confirmpassword" id="confirmpassword" placeholder="Confirm your password" required>
+            </div>
+
+            <div class="btn-container">
+                <input class="button-design" type="submit" value="Sign Up">
+                <input class="button-design" type="button" value="Back to Login" onclick="window.location.href='/'">
+            </div>
+        </form>
+    </div>
+</body>
+</html>
