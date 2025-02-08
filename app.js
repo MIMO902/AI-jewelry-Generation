@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import logger from "morgan";
 import session from "express-session";
 
+
 import fileUpload from "express-fileupload";
 import cookieParser from "cookie-parser";
 
@@ -29,6 +30,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(session({ secret: "any secret" }));
+
 
 //ROUTES
 app.use("/", indexRouter);

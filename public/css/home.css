@@ -54,7 +54,7 @@ input {
     font-size: 16px; /* Bigger text */
 }
 
-button {
+.gen-button {
     padding: 12px;
     background: black;
     color: white;

@@ -10,7 +10,7 @@
 
    
     <header>
-        <img src="/img/img4.png" alt="JewelryGen Logo" class="logo">
+        <img src="/img/img4.jpg" alt="JewelryGen Logo" class="logo">
         <h1>JewelryGen</h1>
     </header>
 
@@ -18,7 +18,9 @@
         <h2>Generate Your Jewelry Design</h2>
         <div class="input-container">
             <input type="text" placeholder="Enter your design prompt here...">
-            <button>Generate Designs</button>
+          <form action="/user/watermark" method="post">
+            <input class="gen-button" type="submit" value="Generate Designs">
+          </form>
         </div>
 
         <h3 class="gallery">Your Generated Designs</h3>
