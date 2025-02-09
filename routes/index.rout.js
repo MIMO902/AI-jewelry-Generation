@@ -16,7 +16,7 @@ router.get('/', function (req, res, next) {
 });
 router.get('/Signup', function (req, res, next) {
   console.log('index.js: GET /');
-  res.render('pages/Signup',{ user: (req.session.user === undefined ? "" : req.session.user)});
+  res.render('pages/Signup',{errors:[], user: (req.session.user === undefined ? "" : req.session.user)});
 });
 
 router.post('/login-action', login);

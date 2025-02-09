@@ -13,6 +13,13 @@
             <span>JewelryGen</span>
         </div>
         <form action="/login-action" method="post">
+            <% if (errors) { %>
+                <div class="error-box">
+                    <p>
+                      <%= errors%>
+                    </p>
+                </div>
+                <% } %>  
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" name="logusername" id="username" placeholder="Enter your username" required>

@@ -67,7 +67,7 @@ const signup = async (req, res) => {
 };
 
 const login = async (req, res, next) => {
- 
+  let errors
   const existinguser = await User.findOne({ username: req.body.logusername });
   if(existinguser){
     const hashePassword =await bcrypt.compare(req.body.logpassword, existinguser.password);
@@ -81,18 +81,18 @@ const login = async (req, res, next) => {
       }
     }else{
       console.log("password is not correct");
-      errors=["wrong password"]
+      errors="wrong password"
     res.render("pages/login", {
       title: "login page - Validation Failed",
-      errors: errors.array(),
+      errors: errors,
     });
     }
   }else{
     console.log("username does not exists");
-    errors=["username does not exists"]
+    errors="username does not exists"
     res.render("pages/login", {
       title: "login page - Validation Failed",
-      errors: errors.array(),
+      errors: errors,
     });
     return;
   }
