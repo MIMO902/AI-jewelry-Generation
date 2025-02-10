@@ -3,24 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JewelryGen</title>
+    <title>JewelryJinn</title>
     <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/navbar.css"> <!-- Link Navbar CSS -->
 </head>
 <body>
 
-   
-    <header>
-        <img src="/img/img4.jpg" alt="JewelryGen Logo" class="logo">
-        <h1>JewelryGen</h1>
-    </header>
-
+    <%- include("../partials/navbar") %>
     <main>
         <h2>Generate Your Jewelry Design</h2>
         <div class="input-container">
             <input type="text" placeholder="Enter your design prompt here...">
-          <form action="/user/watermark" method="post">
-            <input class="gen-button" type="submit" value="Generate Designs">
-          </form>
+            <form action="/user/watermark" method="post">
+                <input class="gen-button" type="submit" value="Generate Designs">
+            </form>
         </div>
 
         <h3 class="gallery">Your Generated Designs</h3>
@@ -41,7 +37,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2023 JewelryGen. All rights reserved. | <a href="#">Contact Us</a> | <a href="#">Privacy Policy</a></p>
+        <p>&copy; 2023 JewelryJinn. All rights reserved. | <a href="#">Contact Us</a> | <a href="#">Privacy Policy</a></p>
     </footer>
 
 </body>

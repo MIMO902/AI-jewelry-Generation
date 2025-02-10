@@ -14,68 +14,100 @@ body {
     min-height: 100vh;
 }
 
-/* HEADER: Logo & Title Alignment */
-header {
+/* HEADER: Navbar Styling */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.navbar-left {
     display: flex;
     align-items: center;
-    padding: 15px 20px;
-    background-color: white;
 }
 
 .logo {
-    width: 100px; /* Increased size */
-    height: 100px;
-    margin-right: 15px;
+    width: 50px;
+    height: auto;
+    margin-right: 10px;
 }
 
-h1 {
-    font-size: 26px;
+.brand-name {
+    font-size: 22px;
+    font-weight: bold;
     color: black;
-    margin: 0;
+}
+
+.navbar-right a {
+    margin-left: 20px;
+    text-decoration: none;
+    color: black;
+    font-size: 16px;
+}
+
+.navbar-right a:hover {
+    text-decoration: underline;
 }
 
 /* MAIN CONTENT */
 main {
     flex: 1;
-    padding: 40px 20px; /* Increased padding */
+    padding: 40px 20px;
 }
-
 
 /* TEXT SPACING */
 h2 {
-    margin-bottom: 20px; /* More space below the heading */
+    margin-bottom: 20px;
 }
 
-input {
-    padding: 12px;
-    width: 400px; /* Increased width */
+/* INPUT & BUTTON CONTAINER */
+.input-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Space between input & button */
+}
+
+/* INPUT STYLING */
+input[type="text"] {
+    padding: 15px;
+    width: 400px;
+    height: 50px; /* Increased height */
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 16px; /* Bigger text */
+    font-size: 16px;
 }
 
+/* GENERATE BUTTON */
 .gen-button {
-    padding: 12px;
+    padding: 15px 20px; /* Adjusted padding */
     background: black;
     color: white;
     border: none;
     cursor: pointer;
     border-radius: 5px;
     font-size: 14px;
-    margin-top: 10px; /* Added spacing between button and image */
+    height: 45px; /* Matched input height */
+}
+
+.gen-button:hover {
+    background: rgba(0, 0, 0, 0.8);
 }
 
 /* GALLERY */
 .gallery {
     display: flex;
     justify-content: center;
-    gap: 45px; /* Increased spacing */
+    gap: 45px;
     margin-top: 50px;
     flex-wrap: wrap;
 }
 
 .design {
-    width: 280px; /* Increased image size */
+    width: 280px;
     border-radius: 10px;
     overflow: hidden;
     display: flex;
@@ -88,10 +120,10 @@ input {
     width: 100%;
     height: auto;
     border-radius: 10px;
-    margin-bottom: 10px; /* Added spacing between image and button */
+    margin-bottom: 10px;
 }
 
-/* SAVE BUTTON: Positioned Below Image */
+/* SAVE BUTTON */
 .save-button {
     background: black;
     color: white;
@@ -107,7 +139,7 @@ input {
     background: rgba(0, 0, 0, 0.8);
 }
 
-/* FOOTER: Sticks to Bottom */
+/* FOOTER */
 footer {
     background-color: white;
     color: black;
