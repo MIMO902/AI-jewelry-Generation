@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {
-  watermark,
+  generate,
 } from "../controllers/generated_img.controller.js";
 
 const router = Router();
@@ -19,7 +19,6 @@ router.get('/Signout', function (req, res, next) {
   res.render('pages/Login',{errors:[], user: (req.session.user === undefined ? "" : req.session.user)});
 });
 
-
-router.post('/watermark',watermark);
+router.post('/generate',generate);
 
 export default router;

@@ -3,6 +3,7 @@ import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 import logger from "morgan";
 import session from "express-session";
+import cors from "cors";
 
 
 import fileUpload from "express-fileupload";
@@ -30,6 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(session({ secret: "any secret" }));
+app.use(cors());
 
 
 //ROUTES

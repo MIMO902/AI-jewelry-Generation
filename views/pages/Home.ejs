@@ -13,8 +13,8 @@
     <main>
         <h2>Generate Your Jewelry Design</h2>
         <div class="input-container">
-            <input type="text" placeholder="Enter your design prompt here...">
-            <form action="/user/watermark" method="post">
+            <form action="/user/generate" method="post">
+                <input type="text" name="prompt" id="prompt" placeholder="Enter your design prompt here...">
                 <input class="gen-button" type="submit" value="Generate Designs">
             </form>
         </div>
