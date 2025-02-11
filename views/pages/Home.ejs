@@ -24,27 +24,52 @@
         <!-- GALLERY CONTAINER -->
         <div class="gallery">
             <div class="design">
-                <img src="/img/img1.jpeg" alt="Gold Necklace">
-                <div class="button-container">
-                    <button class="save-button">Save</button>
-                    <button class="save-button" onclick="openModal('/img/img1.jpeg')">Edit</button>
-                </div>
+                <% if (generated_images) { %>
+                    <% console.log(generated_images[0]) %>
+                    <img src="<%=generated_images[0].imagePath%>" alt="Gold Necklace">
+                <% } else { %>
+                    <img src="/img/img1.jpeg" alt="Gold Necklace">
+                <% } %>
+                <% if (generated_images) { %>
+                    <div class="button-container">
+                        <form action="/user/save-image/<%=generated_images[0].id%>" method="post">
+                            <input class="save-button" type="submit" value="save">
+                        </form>
+                        <button class="save-button" onclick="openModal('<%=generated_images[0].imagePath%>')">Edit</button>
+                    </div>
+                 <% } %>
             </div>
 
             <div class="design">
-                <img src="/img/img2.jpeg" alt="Silver Earrings">
-                <div class="button-container">
-                    <button class="save-button">Save</button>
-                    <button class="save-button" onclick="openModal('/img/img2.jpeg')">Edit</button>
-                </div>
+                <% if (generated_images) { %>
+                    <img src="<%=generated_images[1].imagePath%>" alt="Gold Necklace">
+                <% } else { %>
+                    <img src="/img/img1.jpeg" alt="Gold Necklace">
+                <% } %>
+                <% if (generated_images) { %>
+                    <div class="button-container">
+                        <form action="/user/save-image/<%=generated_images[1].id%>" method="post">
+                            <input class="save-button" type="submit" value="save">
+                        </form>
+                        <button class="save-button" onclick="openModal('<%=generated_images[1].imagePath%>')">Edit</button>
+                    </div>
+                    <% } %>
             </div>
 
             <div class="design">
-                <img src="/img/img3.jpeg" alt="Diamond Ring">
+                <% if (generated_images) { %>
+                    <img src="<%=generated_images[2].imagePath%>" alt="Gold Necklace">
+                <% } else { %>
+                    <img src="/img/img1.jpeg" alt="Gold Necklace">
+                <% } %>
+                <% if (generated_images) { %>
                 <div class="button-container">
-                    <button class="save-button">Save</button>
-                    <button class="save-button" onclick="openModal('/img/img3.jpeg')">Edit</button>
+                    <form action="/user/save-image/<%=generated_images[2].id%>" method="post">
+                        <input class="save-button" type="submit" value="save">
+                    </form>
+                    <button class="save-button" onclick="openModal('<%=generated_images[2].imagePath%>')">Edit</button>
                 </div>
+                <% } %>
             </div>
         </div>
     </main>

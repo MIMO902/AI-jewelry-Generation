@@ -4,6 +4,8 @@ import { fileURLToPath } from "url";
 import fileUpload from "express-fileupload";
 import axios from "axios";
 import fs from "fs";
+import image from '../models/image.model.js'
+import save_design from '../models/saved_design.model.js'
 
 const  SD_API_URL = "http://127.0.0.1:7860/sdapi/v1/txt2img";
 
@@ -32,6 +34,7 @@ const generate = async (req, res) => {
       };
 
       const imagePaths = [];
+      const images=[]
       for (let i = 0; i < 3; i++) {
           const response = await axios.post(SD_API_URL, requestData, {
               headers: { "Content-Type": "application/json" },
@@ -43,10 +46,17 @@ const generate = async (req, res) => {
           
           // Apply watermark
           const watermarkedPath = await addWatermark(imagePath);
+          const image = await add_image(watermarkedPath,prompt)
           imagePaths.push(watermarkedPath);
+          console.log(image)
+          images.push(image)
       }
-
-      res.json({ success: true, generated_images: imagePaths });
+      console.log(images)
+      res.render("pages/home", {
+        title: "home - generated",
+        generated_images: images,
+        user: (req.session.user === undefined ? "" : req.session.user)
+      });
   } catch (error) {
       console.error("Error generating jewelry images:", error);
       res.status(500).json({ error: "Failed to generate images" });
@@ -57,6 +67,8 @@ const addWatermark = async (inputImage) => {
   try {
       const watermarkPath = "./public/img/img4.jpg"; // Ensure this file exists
       const outputPath = `./public/img/watermarked_${path.basename(inputImage)}`;
+      const mypath = outputPath.replace('./public', '');
+      console.log(mypath)
 
       const watermark = await sharp(watermarkPath)
           .resize(200) // Adjust watermark size
@@ -67,15 +79,41 @@ const addWatermark = async (inputImage) => {
           .composite([{ input: watermark, gravity: "southeast" }])
           .toFile(outputPath);
           
-      await fs.unlinkSync(inputImagePath);
+      await fs.unlinkSync(inputImage);
 
-      return outputPath;
+      return mypath;
   } catch (error) {
       console.error("Failed to apply watermark:", error);
       return inputImage; // If watermarking fails, return the original image
   }
 };
 
+const add_image= async (inputImage,Prompt) => {
+    const Image = new image({
+        imagePath : inputImage,
+        prompt : Prompt,
+    });
+    Image.save().then((result) => {
+        console.log("image added succesfully");
+        return result;
+      }).catch((err) => {
+        console.log(err);
+      });
+}
+const save_image = async (req, res) => {
+        const wish = new save_design({
+            userid: req.session.user._id,
+            imageid: req.params.id,
+          });
+          console.log(wish);
+          wish
+            .save()
+            .then((result) => {
+              console.log("design saved")
+            })
+            .catch((err) => console.log(err));
+}
 export {
   generate,
+  save_image,
 };
