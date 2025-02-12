@@ -19,6 +19,7 @@ router.get('/Signup', function (req, res, next) {
   res.render('pages/Signup',{errors:[], user: (req.session.user === undefined ? "" : req.session.user)});
 });
 
+
 router.post('/login-action', login);
 router.post('/signup-action', validation, signup);
 router.post('/checkUN',checkUN);

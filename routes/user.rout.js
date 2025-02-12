@@ -10,6 +10,16 @@ router.get('/Home', function (req, res, next) {
   res.render('pages/Home',{ user: (req.session.user === undefined ? "" : req.session.user)});
 });
 
+router.get('/SavedImages', function (req, res, next) {
+  console.log('index.js: GET /');
+  res.render('pages/SavedImages',{ user: (req.session.user === undefined ? "" : req.session.user)});
+});
+router.get('/Signout', function (req, res, next) {
+  console.log('index.js: GET /');
+  res.render('pages/Login',{errors:[], user: (req.session.user === undefined ? "" : req.session.user)});
+});
+
+
 router.post('/watermark',watermark);
 
 export default router;

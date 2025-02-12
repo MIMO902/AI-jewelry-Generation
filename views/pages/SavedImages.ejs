@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jewelry Design Gallery</title>
+    <link rel="stylesheet" href="/css/savedimages.css"> <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="/css/navbar.css">
+</head>
+<body>
+    <%- include("../partials/navbar") %>
+    <!-- HEADER -->
+
+    <!-- MAIN CONTENT -->
+    <h2>Saved Jewelry Designs</h2>
+    <div class="gallery">
+        
+
+        <!-- Example Designs -->
+        <div class="design">
+            <button class="delete-button" onclick="deleteDesign(this)">X</button>
+            <img src="/img/img1.jpeg" alt="Diamond Necklace">
+            <p>An exquisite diamond necklace with a sapphire centerpiece.</p>
+            <button class="view-button">View Details</button>
+        </div>
+
+        <div class="design">
+            <button class="delete-button" onclick="deleteDesign(this)">X</button>
+            <img src="/img/img2.jpeg" alt="Gold Earrings">
+            <p>Elegant gold earrings adorned with delicate pearl drops.</p>
+            <button class="view-button">View Details</button>
+        </div>
+
+        <div class="design">
+            <button class="delete-button" onclick="deleteDesign(this)">X</button>
+            <img src="/img/img2.jpeg" alt="Platinum Bracelet">
+            <p>Luxurious platinum bracelet with intricate diamond inlays.</p>
+            <button class="view-button">View Details</button>
+        </div>
+    </div>
+
+    <script>
+        // Function to delete a design card
+        function deleteDesign(button) {
+            const designCard = button.parentElement;
+            designCard.remove();
+        }
+    </script>
+
+</body>
+</html>

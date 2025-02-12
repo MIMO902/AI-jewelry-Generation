@@ -1,0 +1,103 @@
+/* Reset styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+h2{
+    margin-top: 30px;
+}
+
+/* MAIN CONTENT */
+/* Adds spacing for scrollbar */
+
+/* GALLERY: Forces images in ONE ROW with scrolling */
+.gallery {
+    display: flex;
+    gap: 35px; /* Space between cards */
+    padding: 20px 0;
+    overflow-x: auto; /* Allows scrolling if content overflows */
+    flex-wrap: nowrap;
+    max-width: 100%;
+    margin: 20px auto;
+    overflow-x: auto; /* Enables horizontal scrolling */
+    white-space: nowrap; /* Prevents wrapping to a new line */
+    padding-bottom: 10px; 
+    padding: 15px; /* Prevents wrapping to a new row */
+}
+
+/* DESIGN CARD */
+.design {
+    position: relative;
+    background: white;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    padding: 26px;
+    text-align: center;
+    width: 400px; /* Matches the card size in your image */
+    min-height: 400px; /* Keeps card height consistent */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    white-space: normal;
+    margin-top: 20px; /* Allows text to wrap inside the card */
+}
+.design p{
+margin: 20px;
+}
+/* IMAGE STYLING */
+.design img {
+    width: 100%;
+    height: 270px; /* Fixed height to match your screenshot */
+    object-fit: cover; /* Ensures the image scales properly */
+    border-radius: 10px;
+    display: block;
+}
+
+/* DELETE BUTTON (Top-Right of Image) */
+.delete-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: red;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease;
+}
+
+.delete-button:hover {
+    background: darkred;
+}
+
+/* VIEW DETAILS BUTTON */
+.view-button {
+    background: black;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 5px;
+    transition: background 0.3s;
+    font-size: 14px;
+    width: 100%;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    margin-top: 0; /* Push button to bottom */
+}
+
+.view-button:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
