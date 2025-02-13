@@ -6,6 +6,7 @@ import axios from "axios";
 import fs from "fs";
 import image from '../models/image.model.js'
 import save_design from '../models/saved_design.model.js'
+import User from '../models/user.model.js';
 
 const  SD_API_URL = "http://127.0.0.1:7860/sdapi/v1/txt2img";
 
@@ -35,6 +36,7 @@ const generate = async (req, res) => {
 
       const imagePaths = [];
       const images=[]
+      console.log(req.session.user)
       for (let i = 0; i < 3; i++) {
           const response = await axios.post(SD_API_URL, requestData, {
               headers: { "Content-Type": "application/json" },
@@ -68,7 +70,6 @@ const addWatermark = async (inputImage) => {
       const watermarkPath = "./public/img/img4.jpg"; // Ensure this file exists
       const outputPath = `./public/img/watermarked_${path.basename(inputImage)}`;
       const mypath = outputPath.replace('./public', '');
-      console.log(mypath)
 
       const watermark = await sharp(watermarkPath)
           .resize(200) // Adjust watermark size
@@ -93,27 +94,76 @@ const add_image= async (inputImage,Prompt) => {
         imagePath : inputImage,
         prompt : Prompt,
     });
-    Image.save().then((result) => {
-        console.log("image added succesfully");
-        return result;
-      }).catch((err) => {
+    console.log(Image)
+    await Image.save().catch((err) => {
         console.log(err);
       });
+      console.log("image added succesfully");
+      return Image;
 }
 const save_image = async (req, res) => {
-        const wish = new save_design({
-            userid: req.session.user._id,
-            imageid: req.params.id,
-          });
-          console.log(wish);
-          wish
-            .save()
-            .then((result) => {
-              console.log("design saved")
-            })
-            .catch((err) => console.log(err));
+  console.log("i am in the save fun")
+  if(req.session.user===undefined)
+    {
+      res.redirect("/");
+    }else{
+    const exsistingsave = await save_design.findOne({
+      userid: req.session.user._id,
+      imageid: req.params.id,
+    });
+    if (!exsistingsave) {
+      const wish = new save_design({
+          userid: req.session.user._id,
+          imageid: req.params.id,
+        });
+        console.log(wish);
+        wish
+          .save()
+          .then((result) => {
+            console.log("design saved")
+          })
+          .catch((err) => console.log(err));
+            }
+    }
+      }
+
+const saveddesigns = async (req, res) => {
+  console.log(req.session.user)
+  var query = { "_id": req.params.id };
+  const arr=[];
+  User.find(query)
+  .then(result1 => {
+    save_design.find({"userid":req.params.id}).then(async result=>{
+console.log(result);
+if(result.length>0){
+for(var i=0;i<result.length;i++){
+  const saveddesign=await image.findOne({"_id":result[i].imageid})
+    arr[i]=saveddesign;
+  }
+}
+ res.render('pages/savedimages', { saved : arr , user: (req.session.user === undefined ? "" : req.session.user)});
+}).catch(err1 => {
+console.log(err1);
+});
+})
+  .catch(err => {
+    console.log(err);
+  });
+}
+const delete_saved_design = async (req, res) => {
+  console.log("i am inside delete function")
+  const now=await save_design.findOne({"imageid" :req.params.id , "userid":req.session.user._id})
+  save_design.findByIdAndDelete(now.id)
+    .then(result => {
+      res.redirect('/user/Home')
+    })
+    .catch(err => {
+      console.log(err);
+    });
 }
 export {
   generate,
   save_image,
+  saveddesigns,
+  delete_saved_design,
 };

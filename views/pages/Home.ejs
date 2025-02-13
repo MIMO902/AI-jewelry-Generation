@@ -32,7 +32,7 @@
                 <% } %>
                 <% if (generated_images) { %>
                     <div class="button-container">
-                        <form action="/user/save-image/<%=generated_images[0].id%>" method="post">
+                        <form action="/user/save_image/<%=generated_images[0].id%>" method="post">
                             <input class="save-button" type="submit" value="save">
                         </form>
                         <button class="save-button" onclick="openModal('<%=generated_images[0].imagePath%>')">Edit</button>
@@ -48,7 +48,7 @@
                 <% } %>
                 <% if (generated_images) { %>
                     <div class="button-container">
-                        <form action="/user/save-image/<%=generated_images[1].id%>" method="post">
+                        <form action="/user/save_image/<%=generated_images[1].id%>" method="post">
                             <input class="save-button" type="submit" value="save">
                         </form>
                         <button class="save-button" onclick="openModal('<%=generated_images[1].imagePath%>')">Edit</button>
@@ -64,7 +64,7 @@
                 <% } %>
                 <% if (generated_images) { %>
                 <div class="button-container">
-                    <form action="/user/save-image/<%=generated_images[2].id%>" method="post">
+                    <form action="/user/save_image/<%=generated_images[2].id%>" method="post">
                         <input class="save-button" type="submit" value="save">
                     </form>
                     <button class="save-button" onclick="openModal('<%=generated_images[2].imagePath%>')">Edit</button>

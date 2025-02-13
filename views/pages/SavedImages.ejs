@@ -15,35 +15,29 @@
     <h2>Saved Jewelry Designs</h2>
     <div class="gallery">
         
-
+        <% if(saved){%>
+            <% saved.forEach((s)=>{%>
         <!-- Example Designs -->
         <div class="design">
-            <button class="delete-button" onclick="deleteDesign(this)">X</button>
-            <img src="/img/img1.jpeg" alt="Diamond Necklace">
-            <p>An exquisite diamond necklace with a sapphire centerpiece.</p>
+            <form method="post" action="/user/del_saved_design/<%=s.id%>">
+                <input type="submit" class="delete-button"  value="X">
+            </form>
+            <img src="<%=s.imagePath%>" alt="Diamond Necklace">
+            <p><%=s.prompt%></p>
             <button class="view-button">View Details</button>
         </div>
-
-        <div class="design">
-            <button class="delete-button" onclick="deleteDesign(this)">X</button>
-            <img src="/img/img2.jpeg" alt="Gold Earrings">
-            <p>Elegant gold earrings adorned with delicate pearl drops.</p>
-            <button class="view-button">View Details</button>
-        </div>
-
-        <div class="design">
-            <button class="delete-button" onclick="deleteDesign(this)">X</button>
-            <img src="/img/img2.jpeg" alt="Platinum Bracelet">
-            <p>Luxurious platinum bracelet with intricate diamond inlays.</p>
-            <button class="view-button">View Details</button>
-        </div>
+        <%})%>
+        <%} else{%>
+            <p>you have nothing in the wishlist</p>
+            <%}%>
     </div>
 
     <script>
         // Function to delete a design card
         function deleteDesign(button) {
             const designCard = button.parentElement;
-            designCard.remove();
+            const formparent = designCard.parentElement;
+            formparent.remove();
         }
     </script>
 
