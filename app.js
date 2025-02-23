@@ -6,6 +6,7 @@ import session from "express-session";
 import cors from "cors";
 
 
+
 import fileUpload from "express-fileupload";
 import cookieParser from "cookie-parser";
 
@@ -32,7 +33,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(session({ secret: "any secret" }));
 app.use(cors());
-
 
 //ROUTES
 app.use("/", indexRouter);
