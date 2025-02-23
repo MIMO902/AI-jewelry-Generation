@@ -16,6 +16,7 @@
     "axios": "^1.7.9",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.3",
+    "child_process": "^1.0.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "date": "^2.0.6",
