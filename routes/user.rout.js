@@ -17,12 +17,7 @@ router.get('/Home', function (req, res, next) {
 });
 
 router.get('/SavedImages/:id', saveddesigns);
-router.get('/Signout', function (req, res, next) {
-  console.log('index.js: GET /');
-  console.log(req.session.user)
-  req.session.destroy();
-  res.redirect('/')
-});
+
 router.post('/del_saved_design/:id',delete_saved_design)
 router.post('/generate',generate);
 

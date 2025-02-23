@@ -15,7 +15,7 @@
     <h2>Saved Jewelry Designs</h2>
     <div class="gallery">
         
-        <% if(saved){%>
+        <% if(saved > 0){%>
             <% saved.forEach((s)=>{%>
         <!-- Example Designs -->
         <div class="design">
@@ -28,7 +28,7 @@
         </div>
         <%})%>
         <%} else{%>
-            <p>you have nothing in the wishlist</p>
+            <p>you have no saved designs</p>
             <%}%>
     </div>
 
