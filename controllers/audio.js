@@ -3,7 +3,7 @@ import { exec } from "child_process";
 import fs from "fs";
 import vosk from "vosk";
 
-const voskModelPath = "C:/Users/Dell/OneDrive/Desktop/vosk_model/vosk-model-en-us-0.22"; // Update the path
+const voskModelPath = "C:/Users/youssef/Desktop/vosk_model/vosk-model-en-us-0.22"; // Update the path
 const model = new vosk.Model(voskModelPath);
 
 function transcribeWithVosk(audioPath) {
