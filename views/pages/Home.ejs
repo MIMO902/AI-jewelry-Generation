@@ -17,6 +17,9 @@
                 <input type="text" name="prompt" id="prompt" placeholder="Enter your design prompt here...">
                 <input class="gen-button" type="submit" value="Generate Designs">
             </form>
+            <button id="startRecord">Start Recording</button>
+            <button id="stopRecord" disabled>Stop Recording</button>
+            <p><strong>Transcription:</strong> <span id="transcription"></span></p>
         </div>
 
         <h3>Your Generated Designs</h3>
@@ -106,6 +109,44 @@
             }
         };
     </script>
+
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+
+    document.getElementById("startRecord").addEventListener("click", async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+        mediaRecorder.onstop = sendAudioToServer;
+
+        mediaRecorder.start();
+        document.getElementById("startRecord").disabled = true;
+        document.getElementById("stopRecord").disabled = false;
+    });
+
+    document.getElementById("stopRecord").addEventListener("click", () => {
+        mediaRecorder.stop();
+        document.getElementById("startRecord").disabled = false;
+        document.getElementById("stopRecord").disabled = true;
+    });
+
+    async function sendAudioToServer() {
+        const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+        const formData = new FormData();
+        formData.append("audio", audioBlob, "recorded.wav");
+
+        const response = await fetch("http://localhost:3000/user/transcribe", {
+            method: "POST",
+            body: formData,
+        });
+
+        const data = await response.json();
+        document.getElementById("transcription").innerText = data.transcript || "Failed to transcribe.";
+    }
+</script>
 
 </body>
 </html>

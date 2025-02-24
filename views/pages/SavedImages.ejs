@@ -12,7 +12,8 @@
     
     <h2>Saved Jewelry Designs</h2>
     <div class="gallery">
-        <% if(saved){%>
+        
+        <% if(saved > 0){%>
             <% saved.forEach((s)=>{%>
         <div class="design">
             <form method="post" action="/user/del_saved_design/<%=s.id%>">
@@ -24,8 +25,8 @@
         </div>
         <%})%>
         <%} else{%>
-            <p>You have nothing in the wishlist</p>
-        <%}%>
+            <p>you have no saved designs</p>
+            <%}%>
     </div>
 
     <div id="editModal" class="modal">

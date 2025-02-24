@@ -4,166 +4,210 @@ import { fileURLToPath } from "url";
 import fileUpload from "express-fileupload";
 import axios from "axios";
 import fs from "fs";
-import image from '../models/image.model.js'
-import save_design from '../models/saved_design.model.js'
-import User from '../models/user.model.js';
+import image from "../models/image.model.js";
+import save_design from "../models/saved_design.model.js";
+import User from "../models/user.model.js";
+import StegCloak from 'stegcloak';
+import crypto from 'crypto';
 
-const  SD_API_URL = "http://127.0.0.1:7860/sdapi/v1/txt2img";
+//       const imagePath = 'public/img/jewelry_1739290463830_3.png';
+//       // Apply watermark
+//      const watermarkedImage = applyWatermark(imagePath);
+//      fs.writeFileSync(imagePath, Buffer.from(watermarkedImage, "base64"));
+
+//       // Generate digital signature
+//       const signature = signImage(imagePath);
+//       fs.writeFileSync(`${imagePath}.sig`, signature);
+
+// function signImage(imagePath) {
+//     const privateKey = fs.readFileSync('private.pem', 'utf8');
+//     const imageBuffer = fs.readFileSync(imagePath);
+//     const sign = crypto.createSign('SHA256');
+//     sign.update(imageBuffer);
+//     sign.end();
+//     return sign.sign(privateKey, 'hex');  // Returns a digital signature
+// }
+
+const SD_API_URL = "http://127.0.0.1:7860/sdapi/v1/txt2img";
+
+
+// function applyWatermark(imagePath) {
+//   const stegcloak = new StegCloak(true, false);  // Initialize once
+//   const watermarkMessage = String("JewelryJinn"); // Ensure correct encoding
+//   console.log("Watermark message:", watermarkMessage);
+
+//   const imageBase64 = fs.readFileSync(imagePath, "base64");
+
+//   return stegcloak.hide("generated jewelry-jinn", "Mimo_9021", imageBase64);
+// }
+
 
 const generate = async (req, res) => {
   const prompt = req.body.prompt;
   console.log(prompt);
   try {
-      const requestData = {
-          prompt: prompt,
-          negative_prompt: "blurry, distorted, low quality, unrealistic",
-          sampler_name: "Euler a",
-          steps: 30,  // Reduced steps to avoid OOM error
-          cfg_scale: 7.5,
-          width: 768,
-          height: 1024,
-          batch_size: 1, // Generating images sequentially to save VRAM
-          restore_faces: false,
-          tiling: false,
-          override_settings: {
-              sd_model_checkpoint: "jewelry_v10.safetensors"
-          },
-          enable_hr: false,
-          hr_scale: 2,
-          hr_upscaler: "ESRGAN_4x",
-          script_args: ["<lora:j_gem_sdxl:0.8>"],
-      };
+    const requestData = {
+      prompt: prompt,
+      negative_prompt: "blurry, distorted, low quality, unrealistic",
+      sampler_name: "Euler a",
+      steps: 30, // Reduced steps to avoid OOM error
+      cfg_scale: 7.5,
+      width: 768,
+      height: 1024,
+      batch_size: 1, // Generating images sequentially to save VRAM
+      restore_faces: false,
+      tiling: false,
+      override_settings: {
+        sd_model_checkpoint: "jewelry_v10.safetensors",
+      },
+      enable_hr: false,
+      hr_scale: 2,
+      hr_upscaler: "ESRGAN_4x",
+      script_args: ["<lora:j_gem_sdxl:0.8>"],
+    };
 
-      const imagePaths = [];
-      const images=[]
-      console.log(req.session.user)
-      for (let i = 0; i < 3; i++) {
-          const response = await axios.post(SD_API_URL, requestData, {
-              headers: { "Content-Type": "application/json" },
-          });
-          
-          const imageBase64 = response.data.images[0];
-          const imagePath = `./public/img/jewelry_${Date.now()}_${i + 1}.png`;
-          fs.writeFileSync(imagePath, Buffer.from(imageBase64, "base64"));
-          
-          // Apply watermark
-          const watermarkedPath = await addWatermark(imagePath);
-          const image = await add_image(watermarkedPath,prompt)
-          imagePaths.push(watermarkedPath);
-          console.log(image)
-          images.push(image)
-      }
-      console.log(images)
-      res.render("pages/home", {
-        title: "home - generated",
-        generated_images: images,
-        user: (req.session.user === undefined ? "" : req.session.user)
+    // const imagePaths = [];
+    const images = [];
+    console.log(req.session.user);
+    for (let i = 0; i < 3; i++) {
+      const response = await axios.post(SD_API_URL, requestData, {
+        headers: { "Content-Type": "application/json" },
       });
-  } catch (error) {
-      console.error("Error generating jewelry images:", error);
-      res.status(500).json({ error: "Failed to generate images" });
-  }
-};
 
-const addWatermark = async (inputImage) => {
-  try {
-      const watermarkPath = "./public/img/img4.jpg"; // Ensure this file exists
-      const outputPath = `./public/img/watermarked_${path.basename(inputImage)}`;
-      const mypath = outputPath.replace('./public', '');
+      const imageBase64 = response.data.images[0];
+      const imagePath = `./public/img/jewelry_${Date.now()}_${i + 1}.png`;
+      fs.writeFileSync(imagePath, Buffer.from(imageBase64, "base64"));
+      // Apply watermark
+      const watermarkedImage = applyWatermark(imagePath);
+      fs.writeFileSync(imagePath, Buffer.from(watermarkedImage, "base64"));
 
-      const watermark = await sharp(watermarkPath)
-          .resize(200) // Adjust watermark size
-          .png()
-          .toBuffer();
-
-      await sharp(inputImage)
-          .composite([{ input: watermark, gravity: "southeast" }])
-          .toFile(outputPath);
-          
-      await fs.unlinkSync(inputImage);
-
-      return mypath;
-  } catch (error) {
-      console.error("Failed to apply watermark:", error);
-      return inputImage; // If watermarking fails, return the original image
-  }
-};
-
-const add_image= async (inputImage,Prompt) => {
-    const Image = new image({
-        imagePath : inputImage,
-        prompt : Prompt,
+      // Generate digital signature
+      const signature = signImage(imagePath);
+      fs.writeFileSync(`${imagePath}.sig`, signature);
+      // // Apply watermark
+      // const watermarkedPath = await addWatermark(imagePath);
+      const image = await add_image(`${imagePath}.sig`, prompt);
+      // imagePaths.push(watermarkedPath);
+      // console.log(image)
+      images.push(image);
+    }
+    console.log(images);
+    res.render("pages/home", {
+      title: "home - generated",
+      generated_images: images,
+      user: req.session.user === undefined ? "" : req.session.user,
     });
-    console.log(Image)
-    await Image.save().catch((err) => {
-        console.log(err);
-      });
-      console.log("image added succesfully");
-      return Image;
-}
+  } catch (error) {
+    console.error("Error generating jewelry images:", error);
+    res.status(500).json({ error: "Failed to generate images" });
+  }
+};
+
+// const addWatermark = async (inputImage) => {
+//   try {
+//       const watermarkPath = "./public/img/img4.jpg"; // Ensure this file exists
+//       const outputPath = `./public/img/watermarked_${path.basename(inputImage)}`;
+//       const mypath = outputPath.replace('./public', '');
+
+//       const watermark = await sharp(watermarkPath)
+//           .resize(200) // Adjust watermark size
+//           .png()
+//           .toBuffer();
+
+//       await sharp(inputImage)
+//           .composite([{ input: watermark, gravity: "southeast" }])
+//           .toFile(outputPath);
+
+//       await fs.unlinkSync(inputImage);
+
+//       return mypath;
+//   } catch (error) {
+//       console.error("Failed to apply watermark:", error);
+//       return inputImage; // If watermarking fails, return the original image
+//   }
+// };
+
+const add_image = async (inputImage, Prompt) => {
+  const Image = new image({
+    imagePath: inputImage,
+    prompt: Prompt,
+  });
+  console.log(Image);
+  await Image.save().catch((err) => {
+    console.log(err);
+  });
+  console.log("image added succesfully");
+  return Image;
+};
 const save_image = async (req, res) => {
-  console.log("i am in the save fun")
-  if(req.session.user===undefined)
-    {
-      res.redirect("/");
-    }else{
+  console.log("i am in the save fun");
+  if (req.session.user === undefined) {
+    res.redirect("/");
+  } else {
     const exsistingsave = await save_design.findOne({
       userid: req.session.user._id,
       imageid: req.params.id,
     });
     if (!exsistingsave) {
       const wish = new save_design({
-          userid: req.session.user._id,
-          imageid: req.params.id,
-        });
-        console.log(wish);
-        wish
-          .save()
-          .then((result) => {
-            console.log("design saved")
-          })
-          .catch((err) => console.log(err));
-            }
+        userid: req.session.user._id,
+        imageid: req.params.id,
+      });
+      console.log(wish);
+      wish
+        .save()
+        .then((result) => {
+          console.log("design saved");
+        })
+        .catch((err) => console.log(err));
     }
-      }
+  }
+};
 
 const saveddesigns = async (req, res) => {
-  console.log(req.session.user)
-  var query = { "_id": req.params.id };
-  const arr=[];
+  console.log(req.session.user);
+  var query = { _id: req.params.id };
+  const arr = [];
   User.find(query)
-  .then(result1 => {
-    save_design.find({"userid":req.params.id}).then(async result=>{
-console.log(result);
-if(result.length>0){
-for(var i=0;i<result.length;i++){
-  const saveddesign=await image.findOne({"_id":result[i].imageid})
-    arr[i]=saveddesign;
-  }
-}
- res.render('pages/savedimages', { saved : arr , user: (req.session.user === undefined ? "" : req.session.user)});
-}).catch(err1 => {
-console.log(err1);
-});
-})
-  .catch(err => {
-    console.log(err);
-  });
-}
-const delete_saved_design = async (req, res) => {
-  console.log("i am inside delete function")
-  const now=await save_design.findOne({"imageid" :req.params.id , "userid":req.session.user._id})
-  save_design.findByIdAndDelete(now.id)
-    .then(result => {
-      res.redirect('/user/Home')
+    .then((result1) => {
+      save_design
+        .find({ userid: req.params.id })
+        .then(async (result) => {
+          console.log(result);
+          if (result.length > 0) {
+            for (var i = 0; i < result.length; i++) {
+              const saveddesign = await image.findOne({
+                _id: result[i].imageid,
+              });
+              arr[i] = saveddesign;
+            }
+          }
+          res.render("pages/savedimages", {
+            saved: arr,
+            user: req.session.user === undefined ? "" : req.session.user,
+          });
+        })
+        .catch((err1) => {
+          console.log(err1);
+        });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
-}
-export {
-  generate,
-  save_image,
-  saveddesigns,
-  delete_saved_design,
 };
+const delete_saved_design = async (req, res) => {
+  console.log("i am inside delete function");
+  const now = await save_design.findOne({
+    imageid: req.params.id,
+    userid: req.session.user._id,
+  });
+  save_design
+    .findByIdAndDelete(now.id)
+    .then((result) => {
+      res.redirect("/user/Home");
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+export { generate, save_image, saveddesigns, delete_saved_design };
