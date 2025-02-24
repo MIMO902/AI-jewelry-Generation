@@ -4,42 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jewelry Design Gallery</title>
-    <link rel="stylesheet" href="/css/savedimages.css"> <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="/css/savedimages.css">
     <link rel="stylesheet" href="/css/navbar.css">
 </head>
 <body>
     <%- include("../partials/navbar") %>
-    <!-- HEADER -->
-
-    <!-- MAIN CONTENT -->
+    
     <h2>Saved Jewelry Designs</h2>
     <div class="gallery">
-        
         <% if(saved){%>
             <% saved.forEach((s)=>{%>
-        <!-- Example Designs -->
         <div class="design">
             <form method="post" action="/user/del_saved_design/<%=s.id%>">
-                <input type="submit" class="delete-button"  value="X">
+                <input type="submit" class="delete-button" value="X">
             </form>
-            <img src="<%=s.imagePath%>" alt="Diamond Necklace">
+            <img src="<%=s.imagePath%>" alt="Jewelry Design">
             <p><%=s.prompt%></p>
-            <button class="view-button">View Details</button>
+            <button class="view-button" onclick="openModal('<%=s.imagePath%>', '<%=s.grams%>', '<%=s.estimatePrice%>')">View Details</button>
         </div>
         <%})%>
         <%} else{%>
-            <p>you have nothing in the wishlist</p>
-            <%}%>
+            <p>You have nothing in the wishlist</p>
+        <%}%>
     </div>
 
-    <script>
-        // Function to delete a design card
-        function deleteDesign(button) {
-            const designCard = button.parentElement;
-            const formparent = designCard.parentElement;
-            formparent.remove();
-        }
-    </script>
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <img id="modalImage" src="" alt="Jewelry Design">
+            <p  class="popup-text"    id="modalGrams"></p>
+            <p  class="popup-text"   id="modalPrice"></p>
+        </div>
+    </div>
 
+    <footer>
+        <p>&copy; 2023 JewelryJinn. All rights reserved. | <a href="#">Contact Us</a> | <a href="#">Privacy Policy</a></p>
+    </footer>
+
+    <script>
+        function openModal(imageSrc, grams, estimatePrice) {
+            document.getElementById("modalImage").src = imageSrc;
+            document.getElementById("modalGrams").innerText = "Weight: " + grams + " grams";
+            document.getElementById("modalPrice").innerText = "Estimated Price: $" + estimatePrice;
+            document.getElementById("editModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("editModal").style.display = "none";
+        }
+
+        // Close the modal when clicking outside
+        window.onclick = function(event) {
+            let modal = document.getElementById("editModal");
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+    </script>
 </body>
 </html>
