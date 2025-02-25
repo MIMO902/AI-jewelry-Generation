@@ -12,16 +12,15 @@
     
     <h2>Saved Jewelry Designs</h2>
     <div class="gallery">
-        
-        <% if(saved > 0){%>
-            <% saved.forEach((s)=>{%>
+        <% if(saved.length > 0){%>
+            <% saved.forEach( s =>{%>
         <div class="design">
             <form method="post" action="/user/del_saved_design/<%=s.id%>">
                 <input type="submit" class="delete-button" value="X">
             </form>
-            <img src="<%=s.imagePath%>" alt="Jewelry Design">
+            <img src="data:image/png;base64,<%- s.imageData%>" alt="Jewelry Design">
             <p><%=s.prompt%></p>
-            <button class="view-button" onclick="openModal('<%=s.imagePath%>', '<%=s.grams%>', '<%=s.estimatePrice%>')">View Details</button>
+            <button class="view-button" onclick="openModal('data:image/png;base64,<%- s.imageData%>', '<%=s.wieght%>', '<%=s.price%>')">View Details</button>
         </div>
         <%})%>
         <%} else{%>

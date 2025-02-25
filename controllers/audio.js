@@ -1,23 +1,23 @@
 
-import { exec } from "child_process";
-import fs from "fs";
-import vosk from "vosk";
+// import { exec } from "child_process";
+// import fs from "fs";
+// //import vosk from "vosk";
 
-const voskModelPath = "C:/Users/youssef/Desktop/vosk_model/vosk-model-en-us-0.22"; // Update the path
-const model = new vosk.Model(voskModelPath);
+// const voskModelPath = "C:/Users/youssef/Desktop/vosk_model/vosk-model-en-us-0.22"; // Update the path
+// const model = new vosk.Model(voskModelPath);
 
-function transcribeWithVosk(audioPath) {
-  return new Promise((resolve, reject) => {
-    const audio = fs.readFileSync(audioPath);
-    const recognizer = new vosk.Recognizer({ model: model, sampleRate: 16000 });
+// function transcribeWithVosk(audioPath) {
+//   return new Promise((resolve, reject) => {
+//     const audio = fs.readFileSync(audioPath);
+//     const recognizer = new vosk.Recognizer({ model: model, sampleRate: 16000 });
 
-    recognizer.acceptWaveform(audio);
-    const result = recognizer.finalResult();
-    recognizer.free();
+//     recognizer.acceptWaveform(audio);
+//     const result = recognizer.finalResult();
+//     recognizer.free();
 
-    resolve(JSON.parse(result).text);
-  });
-}
+//     resolve(JSON.parse(result).text);
+//   });
+// }
 
 const audioToText = async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No audio uploaded" });

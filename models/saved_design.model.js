@@ -2,16 +2,18 @@ import mongoose from "mongoose";
 
 const savedschema = new mongoose.Schema(
   {
-userid:{
-    type : String,
-    required :true,
-    trim:true,
-},
-imageid:{ 
-    type:String,
-    required :true,
-    trim:true,
-}
+    userid: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
+      trim: true,
+    },
+    imageid: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "images",
+      required: true,
+      trim: true,
+    }
   },
   { timestamps: true }
 )
