@@ -1,15 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JewelryJinn</title>
-    <link rel="stylesheet" href="/css/home.css"> <!-- Link Navbar CSS -->
+    <link rel="stylesheet" href="/css/home.css">
+    <script defer src="/js/maskEditor.js"></script>
 </head>
 <body>
-
     <%- include("../partials/navbar") %>
-
     <main>
         <h2>Generate Your Jewelry Design</h2>
         <div class="input-container">
@@ -17,135 +17,39 @@
                 <input type="text" name="prompt" id="prompt" placeholder="Enter your design prompt here...">
                 <input class="gen-button" type="submit" value="Generate Designs">
             </form>
-            <button id="startRecord">Start Recording</button>
-            <button id="stopRecord" disabled>Stop Recording</button>
-            <p><strong>Transcription:</strong> <span id="transcription"></span></p>
         </div>
-
         <h3>Your Generated Designs</h3>
-
-        <!-- GALLERY CONTAINER -->
         <div class="gallery">
-            <div class="design">
-                <% if (generated_images) { %>
-                    <img src="data:image/png;base64,<%- generated_images[0].imageData%>" alt="Gold Necklace">
-                <% } else { %>
-                    <img src="/img/img1.jpeg" alt="Gold Necklace">
-                <% } %>
-                <% if (generated_images) { %>
-                    <div class="button-container">
-                        <form action="/user/save_image/<%=generated_images[0].id%>" method="post">
-                            <input class="save-button" type="submit" value="save">
-                        </form>
-                        <button class="save-button" onclick="openModal('data:image/png;base64,<%- generated_images[0].imageData%>')">Edit</button>
+            <% if (generated_images) { %>
+                <% generated_images.forEach((image, index) => { %>
+                    <div class="design">
+                        <img id="img-<%= index %>" src="data:image/png;base64,<%- image.imageData %>" alt="Jewelry Design">
+                        <div class="button-container">
+                            <form action="/user/save_image/<%= image.id %>" method="post">
+                                <input class="save-button" type="submit" value="Save">
+                            </form>
+                            <button class="edit-button" onclick="openModal('<%- image.imageData %>', '<%= index %>')">Edit</button>
+                        </div>
                     </div>
-                 <% } %>
-            </div>
-
-            <div class="design">
-                <% if (generated_images) { %>
-                    <img src="data:image/png;base64,<%- generated_images[1].imageData%>" alt="Gold Necklace">
-                <% } else { %>
-                    <img src="/img/img1.jpeg" alt="Gold Necklace">
-                <% } %>
-                <% if (generated_images) { %>
-                    <div class="button-container">
-                        <form action="/user/save_image/<%=generated_images[1].id%>" method="post">
-                            <input class="save-button" type="submit" value="save">
-                        </form>
-                        <button class="save-button" onclick="openModal('data:image/png;base64,<%- generated_images[1].imageData%>')">Edit</button>
-                    </div>
-                    <% } %>
-            </div>
-
-            <div class="design">
-                <% if (generated_images) { %>
-                    <img src="data:image/png;base64,<%- generated_images[2].imageData%>" alt="Gold Necklace">
-                <% } else { %>
-                    <img src="/img/img1.jpeg" alt="Gold Necklace">
-                <% } %>
-                <% if (generated_images) { %>
-                <div class="button-container">
-                    <form action="/user/save_image/<%=generated_images[2].id%>" method="post">
-                        <input class="save-button" type="submit" value="save">
-                    </form>
-                    <button class="save-button" onclick="openModal('data:image/png;base64,<%- generated_images[2].imageData%>')">Edit</button>
-                </div>
-                <% } %>
-            </div>
+                <% }) %>
+            <% } else { %>
+                <p>No designs generated yet.</p>
+            <% } %>
         </div>
     </main>
-
-    <!-- MODAL POPUP -->
     <div id="editModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal()">&times;</span>
-            <img id="modalImage" src="" alt="Jewelry Design">
+            <span class="close-buttons" onclick="closeModal()">&times;</span>
+            <button id="startMask">Start Inpainting</button>
+            <button id="redoMask">Redo</button>
+            <button id="endMask">End</button>
+            <div class="image-container" style="position: relative; display: inline-block;">
+                <img id="modalImage" src="" alt="Jewelry Design" style="display: block; max-width: 100%; height: auto;">
+                <canvas id="maskCanvas" style="position: absolute; top: 0; left: 0;"></canvas>
+            </div>
             <textarea id="editPrompt" placeholder="Enter your edit prompt here..."></textarea>
-            <button class="modal-save-button">Apply Changes</button>
+            <button class="modal-save-button" onclick="applyMask()">Apply Changes</button>
         </div>
     </div>
-
-    <footer>
-        <p>&copy; 2023 JewelryJinn. All rights reserved. | <a href="#">Contact Us</a> | <a href="#">Privacy Policy</a></p>
-    </footer>
-
-    <script>
-        function openModal(imageSrc) {
-            document.getElementById("modalImage").src = imageSrc;
-            document.getElementById("editModal").style.display = "flex";
-        }
-
-        function closeModal() {
-            document.getElementById("editModal").style.display = "none";
-        }
-
-        // Close the modal when clicking outside
-        window.onclick = function(event) {
-            let modal = document.getElementById("editModal");
-            if (event.target === modal) {
-                closeModal();
-            }
-        };
-    </script>
-
-<script>
-    let mediaRecorder;
-    let audioChunks = [];
-
-    document.getElementById("startRecord").addEventListener("click", async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-
-        mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-        mediaRecorder.onstop = sendAudioToServer;
-
-        mediaRecorder.start();
-        document.getElementById("startRecord").disabled = true;
-        document.getElementById("stopRecord").disabled = false;
-    });
-
-    document.getElementById("stopRecord").addEventListener("click", () => {
-        mediaRecorder.stop();
-        document.getElementById("startRecord").disabled = false;
-        document.getElementById("stopRecord").disabled = true;
-    });
-
-    async function sendAudioToServer() {
-        const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-        const formData = new FormData();
-        formData.append("audio", audioBlob, "recorded.wav");
-
-        const response = await fetch("http://localhost:3000/user/transcribe", {
-            method: "POST",
-            body: formData,
-        });
-
-        const data = await response.json();
-        document.getElementById("transcription").innerText = data.transcript || "Failed to transcribe.";
-    }
-</script>
-
 </body>
 </html>

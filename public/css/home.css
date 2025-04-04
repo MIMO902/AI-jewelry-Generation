@@ -99,7 +99,7 @@ input[type="text"] {
 }
 
 /* SAVE & EDIT BUTTONS */
-.save-button {
+.save-button , .edit-button{
     background: black;
     color: white; /* Adjusted padding for smaller buttons */
     border-radius: 5px;
@@ -131,12 +131,16 @@ input[type="text"] {
 }
 
 .modal-content {
+    position: relative; /* Ensure children are positioned relative to this */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     background: white;
     padding: 20px;
     border-radius: 10px;
     width: 400px;
     text-align: center;
-    position: relative;
 }
 
 .close-button {
@@ -152,6 +156,8 @@ input[type="text"] {
     height: auto;
     border-radius: 10px;
     margin-bottom: 10px;
+    display: block;
+    position: relative; /* Ensure stacking context */
 }
 
 textarea {
@@ -186,3 +192,13 @@ footer {
     padding: 10px;
     margin-top: auto;
 }
+#maskCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* Match image size */
+    height: 100%;
+    pointer-events: none; /* Allows drawing */
+    z-index: 10;
+}
+

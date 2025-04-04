@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 
 const imageschema = new mongoose.Schema(
   {
@@ -35,6 +36,10 @@ const imageschema = new mongoose.Schema(
       type: mongoose.Types.Decimal128,
       required: true
     },
+    description:{
+      type: String,
+      require:false
+    }
   },
   { timestamps: true }
 )

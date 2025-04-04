@@ -20,7 +20,7 @@
             </form>
             <img src="data:image/png;base64,<%- s.imageData%>" alt="Jewelry Design">
             <p><%=s.prompt%></p>
-            <button class="view-button" onclick="openModal('data:image/png;base64,<%- s.imageData%>', '<%=s.wieght%>', '<%=s.price%>')">View Details</button>
+            <button class="view-button" onclick="openModal('data:image/png;base64,<%- s.imageData%>', '<%=s.wieght%>', '<%=s.price%>','<%=s.description%>')">View Details</button>
         </div>
         <%})%>
         <%} else{%>
@@ -34,6 +34,7 @@
             <img id="modalImage" src="" alt="Jewelry Design">
             <p  class="popup-text"    id="modalGrams"></p>
             <p  class="popup-text"   id="modalPrice"></p>
+            <p  class="popup-text"   id="description"></p>
         </div>
     </div>
 
@@ -42,10 +43,11 @@
     </footer>
 
     <script>
-        function openModal(imageSrc, grams, estimatePrice) {
+        function openModal(imageSrc, grams, estimatePrice,description) {
             document.getElementById("modalImage").src = imageSrc;
             document.getElementById("modalGrams").innerText = "Weight: " + grams + " grams";
             document.getElementById("modalPrice").innerText = "Estimated Price: $" + estimatePrice;
+            document.getElementById("description").innerText = "description:" + description;
             document.getElementById("editModal").style.display = "flex";
         }
 
