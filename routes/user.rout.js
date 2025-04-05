@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import express from 'express'
+import { spawn } from 'child_process';
 import {
   generate,
   save_image,
@@ -12,79 +14,74 @@ import { exec } from "child_process";
 import fs from "fs";
 import path from "path";
 import ffmpeg from "fluent-ffmpeg";
+import formidable from 'formidable';
 
 ffmpeg.setFfmpegPath("C:/Users/youssef/Downloads/ffmpeg-7.1-essentials_build/ffmpeg-7.1-essentials_build/bin/ffmpeg.exe");
 
-const upload = multer({ dest: "uploads/" });
+
 const router = Router();
 
-router.post("/transcribe", upload.single("audio"), async (req, res) => {
-  console.log("🟢 Received transcription request...");
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      // Define the folder where files will be saved
+      cb(null, 'uploads/'); // Make sure 'uploads' exists or create it
+    },
+    filename: (req, file, cb) => {
+      // Define the filename (you can customize it here)
+      cb(null, Date.now() + path.extname(file.originalname)); // Add file extension
+    }
+  });
+  
+  // Initialize multer with the storage configuration
+  const upload = multer({ storage: storage });
 
-  if (!req.file) {
-      console.error("🔴 No file uploaded");
-      return res.status(400).json({ error: "No file uploaded" });
-  }
-
-  const inputFile = req.file.path;
-  const wavFile = `${inputFile}.wav`;
-
-  console.log(`📂 Processing file: ${inputFile}`);
-
-  try {
-      await convertToWav(inputFile, wavFile);
-      console.log(`✅ Converted to WAV: ${wavFile}`);
-
-      const transcript = await transcribeAudio(wavFile);
-      console.log(`📝 Transcription result: ${transcript}`);
-
-      res.json({ transcript });
-
-  } catch (error) {
-      console.error("🔴 Server Error:", error);
-      res.status(500).json({ error: `Server error: ${error.message}`, details: error.stack });
-  }
-});
-
-
-// Convert webm to wav using ffmpeg
-function convertToWav(input, output) {
-    return new Promise((resolve, reject) => {
-        exec(`ffmpeg -i "${input}" -acodec pcm_s16le -ar 16000 "${output}"`, (error, stdout, stderr) => {
-            if (error) {
-                console.error("🔴 FFmpeg Error:", error);
-                console.error("⚠️ FFmpeg stderr:", stderr);
-                return reject(error);
-            }
-            console.log("✅ FFmpeg stdout:", stdout);
-            resolve();
-        });
-    });
-}
-
-// Transcribe using Whisper.cpp
-function transcribeAudio(audioFile) {
-    return new Promise((resolve, reject) => {
-        const outputFile = audioFile.replace(".wav", ".txt");
-
-        exec(`whisper.cpp/main -m whisper.cpp/models/ggml-base.en.bin -f "${audioFile}" --output_text`, (error, stdout, stderr) => {
-            if (error) {
-                console.error("🔴 Whisper Error:", error);
-                console.error("⚠️ Whisper stderr:", stderr);
-                return reject(error);
-            }
-            console.log("✅ Whisper stdout:", stdout);
-
-            if (!fs.existsSync(outputFile)) {
-                console.error("🔴 Error: Whisper output file not found");
-                return reject(new Error("Whisper output file not found"));
-            }
-
-            const transcript = fs.readFileSync(outputFile, "utf8").trim();
-            resolve(transcript);
-        });
-    });
-}
+//   router.post('/transcribe', async (req, res) => {
+//     // Create a new Formidable instance (Updated for v2.x)
+//     const form = new formidable.Formidable({
+//       uploadDir:'../uploads',  // Directory to save the uploaded file
+//       keepExtensions: true,  // Keep the file extension
+//     });
+  
+//     form.parse(req, async (err, fields, files) => {
+//       if (err) {
+//         console.error("Error parsing form:", err);
+//         return res.status(400).json({ error: "File upload failed." });
+//       }
+  
+//       // Extract the file path of the uploaded audio file
+//       const audioPath = files.audio[0].filepath;
+//       console.log("File received at:", audioPath);
+  
+//       try {
+//         // Run the Python script for transcription
+//         const pythonScript = '../Services/transcribe.py';
+//         const pythonProcess = spawn('python', [pythonScript, audioPath]);
+  
+//         let transcription = '';
+//         let errorOutput = '';
+  
+//         pythonProcess.stdout.on('data', (data) => {
+//           transcription += data.toString();
+//         });
+  
+//         pythonProcess.stderr.on('data', (data) => {
+//           errorOutput += data.toString();
+//         });
+  
+//         pythonProcess.on('close', (code) => {
+//           if (code === 0) {
+//             res.json({ transcription: transcription.trim() });
+//           } else {
+//             console.error('Python error output:', errorOutput);
+//             res.status(500).json({ error: 'Transcription failed.', details: errorOutput });
+//           }
+//         });
+//       } catch (error) {
+//         console.error('Error processing transcription:', error);
+//         res.status(500).json({ error: 'Server error occurred.' });
+//       }
+//     });
+//   });
 
 router.post('/save_image/:id', save_image);
 router.get('/Home', function (req, res) {

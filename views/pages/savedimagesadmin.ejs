@@ -32,9 +32,9 @@
             <%- include("../partials/adminnavbar") %>
 
                 <div class="main-body">
-                    <h2>Units</h2>
+                    <h2>saved designs</h2>
                     <div class="promo_card">
-                        <h1>Here you can Add, Edit and Delete Units</h1>
+                        <h1>Here you can view and Delete saved designs</h1>
                         <!-- <span>This is the Admin Dashboard</span> -->
                     </div>
                     <div class="history_lists">
@@ -48,8 +48,7 @@
                                         <th>Code</th>
                                         <th>Design</th>
                                         <th>prompt</th>
-                                        <th>Weight</th>
-                                        <th>Price</th>
+                                        <th>saved by</th>
                                         <th>Delete</th>
                                     </tr>
                                 </thead>
@@ -62,22 +61,19 @@
                                                         <%=count%>
                                                     </td>
                                                     <td>
-                                                        <a onclick="openModal('data:image/png;base64,<%- img.imageData%>', '<%=img.wieght%>', '<%=img.price%>','<%=img.description%>')">
+                                                        <a onclick="openModal('data:image/png;base64,<%- img.image.imageData%>', '<%=img.image.wieght%>', '<%=img.image.price%>','<%=img.image.description%>')">
                                                         <img class="designimg"
-                                                            src="data:image/png;base64,<%- img.imageData%>"
+                                                            src="data:image/png;base64,<%- img.image.imageData%>"
                                                             alt="Jewelry Design">
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <%=img.prompt%>
+                                                        <%=img.image.prompt%>
                                                     </td>
                                                     <td>
-                                                        <%=img.wieght%>
+                                                        <%=img.username%>
                                                     </td>
-                                                    <td>
-                                                        <%=img.price%>
-                                                    </td>
-                                                    <td><a href="/admin/delimg/<%=img.id%>">Delete</a></td>
+                                                    <td><a href="/user/del_saved_design/<%=img.design.id%>">Delete</a></td>
                                                 </tr>
                                                 <%count++;%>
                                                     <%});%>

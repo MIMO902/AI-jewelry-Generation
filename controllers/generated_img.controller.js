@@ -32,16 +32,16 @@ import translate from 'google-translate-api-x';
 // }
 
 //generateKeys();
-function signImage(imagePath) {
+function signImage(base64Image) {
   const privateKey = fs.readFileSync("./private.pem", "utf8");
 
+  // const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, "");
+
   const sign = crypto.createSign("SHA256");
-  sign.update(Buffer.from(imagePath, "base64"));
+  sign.update(Buffer.from(base64Image, "base64"));
   sign.end();
 
-  const signature = sign.sign(privateKey, "base64"); // Sign in base64 format
-
-  return signature; // Returns a digital signature
+  return sign.sign(privateKey, "base64");
 }
 
 const SD_API_URL = "http://127.0.0.1:7860/sdapi/v1/txt2img";
@@ -63,16 +63,16 @@ function applyWatermark(imagePath) {
 
 async function translateText(text) {
   try {
-      const res = await translate(text, { to: 'en' });
-      return res.text;
+    const res = await translate(text, { to: 'en' });
+    return res.text;
   } catch (error) {
-      console.error("Translation error:", error.message);
-      throw new Error("Translation failed");
+    console.error("Translation error:", error.message);
+    throw new Error("Translation failed");
   }
 }
 const generate = async (req, res) => {
   const prompt = req.body.prompt;
-  const translated =await translateText(prompt)
+  const translated = await translateText(prompt)
   console.log(translated)
   console.log(prompt);
   try {
@@ -110,12 +110,12 @@ const generate = async (req, res) => {
       // const watermarkedImage = applyWatermark(imagePath);
       // const watermarkedPath = `./public/img/watermarked_${Date.now()}_${i + 1}.png`;
       // fs.writeFileSync(watermarkedPath, Buffer.from(watermarkedImage, "base64"));
-
+      const watermarked = await addWatermark(imageBase64);
       // Generate digital signature
-      const signature = signImage(imageBase64);
+      const signature = await signImage(watermarked);
       // // Apply watermark
       // const watermarkedPath = await addWatermark(imagePath);
-      const image = await add_image(req, signature, imageBase64, prompt);
+      const image = await add_image(req, signature, watermarked, prompt);
       // imagePaths.push(watermarkedPath);
       // console.log(image)
       images.push(image);
@@ -131,29 +131,66 @@ const generate = async (req, res) => {
   }
 };
 
-// const addWatermark = async (inputImage) => {
-//   try {
-//       const watermarkPath = "./public/img/img4.jpg"; // Ensure this file exists
-//       const outputPath = `./public/img/watermarked_${path.basename(inputImage)}`;
-//       const mypath = outputPath.replace('./public', '');
 
-//       const watermark = await sharp(watermarkPath)
-//           .resize(200) // Adjust watermark size
-//           .png()
-//           .toBuffer();
 
-//       await sharp(inputImage)
-//           .composite([{ input: watermark, gravity: "southeast" }])
-//           .toFile(outputPath);
+const addWatermark = async (base64Image) => {
+  try {
+    let base64Data = base64Image;
 
-//       await fs.unlinkSync(inputImage);
+    // Strip data URI if it exists
+    const dataUriMatch = base64Image.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+    if (dataUriMatch) {
+      base64Data = dataUriMatch[2];
+    }
 
-//       return mypath;
-//   } catch (error) {
-//       console.error("Failed to apply watermark:", error);
-//       return inputImage; // If watermarking fails, return the original image
-//   }
-// };
+    const imageBuffer = Buffer.from(base64Data, "base64");
+
+    // Get image dimensions
+    const { width, height } = await sharp(imageBuffer).metadata();
+    if (!width || !height) throw new Error("Invalid image dimensions");
+
+    // Watermark SVG (repeated, rotated text)
+    const watermarkSvg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+        <style>
+          .wm-text {
+            fill: rgba(0, 0, 0, 0.2);
+            font-size: 30px;
+            font-family: Arial, sans-serif;
+          }
+        </style>
+        <g transform="rotate(-45 ${width / 2} ${height / 2})">
+          ${Array.from({ length: Math.ceil(height / 100) }, (_, y) =>
+      Array.from({ length: Math.ceil(width / 200) }, (_, x) => {
+        const xPos = x * 200;
+        const yPos = y * 100;
+        return `<text x="${xPos}" y="${yPos}" class="wm-text">JewelryJiin</text>`;
+      }).join("")
+    ).join("")}
+        </g>
+      </svg>
+    `;
+
+    // Apply watermark
+    const outputBuffer = await sharp(imageBuffer)
+      .composite([
+        {
+          input: Buffer.from(watermarkSvg),
+          top: 0,
+          left: 0,
+          blend: "over",
+        },
+      ])
+      .png()
+      .toBuffer();
+
+    // Return plain base64 string (no data URI prefix)
+    return outputBuffer.toString("base64");
+  } catch (err) {
+    console.error("Watermarking error:", err);
+    return base64Image.replace(/^data:(image\/[a-zA-Z+]+);base64,/, "");
+  }
+};
 
 const add_image = async (req, sign, inputImage, Prompt) => {
   const Image = new image({
@@ -164,7 +201,7 @@ const add_image = async (req, sign, inputImage, Prompt) => {
     isSaved: false,
     wieght: 0,
     price: 0,
-    rate:10,
+    rate: 10,
   });
   await Image.save().catch((err) => {
     console.log(err);
@@ -181,10 +218,10 @@ const save_image = async (req, res) => {
 
 
   try {
-    const existingImage = await image.findOne({_id:req.params.id});
+    const existingImage = await image.findOne({ _id: req.params.id });
     const exsistingsave = await save_design.findOne({
       userid: req.session.user._id,
-      imageid:req.params.id,
+      imageid: req.params.id,
     });
 
     if (!exsistingsave) {
@@ -203,7 +240,7 @@ const save_image = async (req, res) => {
       // Save the image with description
       const wish = new save_design({
         userid: req.session.user._id,
-        imageid:req.params.id,
+        imageid: req.params.id,
       });
 
       await wish.save();
@@ -267,7 +304,7 @@ const delete_saved_design = async (req, res) => {
   save_design
     .findByIdAndDelete(now.id)
     .then((result) => {
-      res.redirect("/user/Home");
+      res.redirect(req.session.user.type === "admin" ? "/admin/viewsaved" : "/user/Home");
     })
     .catch((err) => {
       console.log(err);
@@ -327,32 +364,32 @@ const test_authentication = async (req, res) => {
 
 const SD_edit_API_URL = "http://127.0.0.1:7860/sdapi/v1/img2img";
 const editImage = async (req, res) => {
-    const { image, mask,prompt  } = req.body;
+  const { image, mask, prompt } = req.body;
 
-    console.log(prompt)
-    const requestData = {
-        prompt,
-        init_images: [image],  // Original image
-        mask: mask,  // Mask image
-        sampler_name: "Euler a",
-        steps: 30,
-        cfg_scale: 7.5,
-        denoising_strength: 0.75, // Controls how much the AI changes the image
-        width: 768,
-        height: 1024,
-    };
+  console.log(prompt)
+  const requestData = {
+    prompt,
+    init_images: [image],  // Original image
+    mask: mask,  // Mask image
+    sampler_name: "Euler a",
+    steps: 30,
+    cfg_scale: 7.5,
+    denoising_strength: 0.75, // Controls how much the AI changes the image
+    width: 768,
+    height: 1024,
+  };
 
-    try {
-        const response = await axios.post(SD_edit_API_URL, requestData, {
-            headers: { "Content-Type": "application/json" },
-        });
+  try {
+    const response = await axios.post(SD_edit_API_URL, requestData, {
+      headers: { "Content-Type": "application/json" },
+    });
 
-        const editedImage = response.data.images[0];
-        res.json({ editedImage });
-    } catch (error) {
-        console.error("Error editing jewelry image:", error);
-        res.status(500).json({ error: "Failed to edit image" });
-    }
+    const editedImage = response.data.images[0];
+    res.json({ editedImage });
+  } catch (error) {
+    console.error("Error editing jewelry image:", error);
+    res.status(500).json({ error: "Failed to edit image" });
+  }
 };
 const detectMaterials = (description) => {
   const materials = {
@@ -368,7 +405,7 @@ const detectMaterials = (description) => {
       materials.metals.push(metal);
     }
   });
-  if(!materials.metals){
+  if (materials.metals.length === 0) {
     materials.metals.push("silver");
   }
 
@@ -401,16 +438,23 @@ const detectMaterials = (description) => {
 const fetchMetalPrices = async () => {
   try {
     const response = await fetch("https://api.metals.live/v1/spot");
-    const data = await response.json();
-    
+    const data = await response.json(); // data is an array of objects
+
+    // Extract prices from array
+    const priceMap = {};
+    data.forEach(item => {
+      const key = Object.keys(item)[0];
+      priceMap[key] = item[key];
+    });
+
     return {
-      gold: data.gold.price_per_gram || 70,
-      silver: data.silver.price_per_gram || 1,
-      platinum: data.platinum.price_per_gram || 30,
+      gold: priceMap.gold ? priceMap.gold / 31.1 : 70, // Convert per ounce to per gram
+      silver: priceMap.silver ? priceMap.silver / 31.1 : 1,
+      platinum: priceMap.platinum ? priceMap.platinum / 31.1 : 30,
     };
   } catch (error) {
     console.error("Metal price API failed, using fallback.");
-    return { gold: 70, silver: 1, platinum: 30 }; // Use last known average
+    return { gold: 70, silver: 1, platinum: 30 }; // fallback values
   }
 };
 
@@ -425,44 +469,64 @@ const gemstonePrices = {
 };
 const estimateJewelryWeight = (description) => {
   let weight = 0;
-  let type;
+  let type = "ring";
 
   if (/ring/i.test(description)) {
-    type="ring";
+    type = "ring";
     weight = 3 + Math.random() * 7; // 3-10g
   } else if (/necklace|chain/i.test(description)) {
-    type="necklace";
-    weight = 15 + Math.random() * 15; // 15-30g for chains
+    type = "necklace";
+    weight = 15 + Math.random() * 15; // 15-30g
   } else if (/bracelet/i.test(description)) {
-    type="bracelet"
+    type = "bracelet";
     weight = 10 + Math.random() * 10; // 10-20g
   } else if (/earring/i.test(description)) {
-    type="earring";
+    type = "earring";
     weight = 1 + Math.random() * 5; // 1-6g
   }
 
-  if (description.includes("thick") || description.includes("chunky")) {
+  if (/thick|chunky/i.test(description)) {
     weight *= 1.5; // Increase weight for bigger designs
   }
-  return {weight,type};
+
+  return { baseWeight: Number(weight.toFixed(2)), type };
 };
 const estimateStoneWeight = (description) => {
   let stoneWeight = 0;
-  if (description.includes("stones")) stoneWeight += 1
-  if (description.includes("center stone"|| "middle stone"||"diamond")) stoneWeight += 2; // ~2 carats
-  if (description.includes("halo")) stoneWeight += 1; // ~1 carat for small stones
-  if (description.includes("band around the band")) stoneWeight += 0.5;
+  description = description.toLowerCase();
 
-  return stoneWeight;
+  if (/stones?/.test(description)) stoneWeight += 1;
+  if (/center stone|middle stone|centerpiece|main stone/.test(description)) stoneWeight += 2;
+  if (/diamond(s)?|gemstone(s)?/.test(description)) stoneWeight += 2;
+  if (/halo/.test(description)) stoneWeight += 1;
+  if (/band around|encrusted/.test(description)) stoneWeight += 0.5;
+  if (/pav[ée]|cluster|multi-stone|multiple stones|side stones/.test(description)) stoneWeight += 1.5;
+
+  if (/massive|large|big/.test(description)) stoneWeight *= 1.3;
+  if (/tiny|delicate|small/.test(description)) stoneWeight *= 0.7;
+
+  const match = description.match(/(\d+)\s+(diamonds?|stones?|gemstones?)/);
+  if (match) {
+    const count = parseInt(match[1]);
+    stoneWeight += count * 0.3;
+  }
+
+  if (stoneWeight === 0 && /diamond|stone|gem/.test(description)) {
+    stoneWeight = 0.2;
+  }
+
+  return Number(stoneWeight.toFixed(2));
 };
+
 const calculateTotalPrice = async (description) => {
   const metals = await fetchMetalPrices();
   const detectedMaterials = detectMaterials(description);
-  const {baseWeight,type} = estimateJewelryWeight(description);
+  const { baseWeight, type } = estimateJewelryWeight(description);
   const stoneWeight = estimateStoneWeight(description);
   console.log(metals)
   console.log(detectedMaterials)
   console.log(baseWeight)
+  console.log(type)
   console.log(stoneWeight)
   let totalPrice = 0;
   let totalWeight = baseWeight + stoneWeight; // Sum metal & stones
@@ -485,8 +549,8 @@ const calculateTotalPrice = async (description) => {
     totalPrice += gemTotal;
   });
   console.log(totalPrice)
-  if(type=="earring"){
-    totalPrice=totalPrice*2;
+  if (type == "earring") {
+    totalPrice = totalPrice * 2;
   }
 
   return { totalPrice, totalWeight, breakdown };
@@ -495,4 +559,4 @@ const calculateTotalPrice = async (description) => {
 
 
 
-export { generate, save_image, saveddesigns, delete_saved_design, test_authentication,editImage };
+export { generate, save_image, saveddesigns, delete_saved_design, test_authentication, editImage };

@@ -5,6 +5,7 @@ import {
   makeAdmin,
   viewimages,
   deleteimg,
+  viewsaved
 }from '../controllers/admin.controller.js'
 const router = Router();
 
@@ -66,6 +67,7 @@ router.post('/makeuser/:id',(req,res,next)=>{
 // router.post('/addpropirty', addprop);
 // router.post('/editproperty/:id',edit)
 router.get('/images',viewimages);
+router.get('/viewsaved',viewsaved)
 
 
 export default router;

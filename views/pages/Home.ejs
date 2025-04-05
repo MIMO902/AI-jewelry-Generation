@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,10 +12,18 @@
     <main>
         <h2>Generate Your Jewelry Design</h2>
         <div class="input-container">
-            <form action="/user/generate" method="post">
+            <!-- Update form to include file upload -->
+            <form action="/user/generate" method="post" enctype="multipart/form-data">
                 <input type="text" name="prompt" id="prompt" placeholder="Enter your design prompt here...">
                 <input class="gen-button" type="submit" value="Generate Designs">
+                
+                <!-- File input for audio upload -->
+                <!-- <input type="file" name="audio" accept="audio/*" required> -->
+                
+                <!-- Record Button for Starting and Stopping -->
+                <!-- <button type="button" id="recordButton">Start Recording</button> -->
             </form>
+            <audio id="audioPreview" controls style="display:none;"></audio>
         </div>
         <h3>Your Generated Designs</h3>
         <div class="gallery">
@@ -52,4 +59,63 @@
         </div>
     </div>
 </body>
+<script>
+ let mediaRecorder;
+let audioChunks = [];
+
+const recordButton = document.getElementById('recordButton');
+const promptField = document.getElementById('prompt');
+
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.ondataavailable = e => {
+        audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/ogg; codecs=opus' });
+        audioChunks = [];
+
+        const formData = new FormData();
+        formData.append('audio', blob, 'audio.ogg');
+
+        fetch('/user/transcribe', {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.transcription) {
+            promptField.value = data.transcription;
+          } else {
+            alert('Transcription failed.');
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          alert('An error occurred during transcription.');
+        });
+      };
+    })
+    .catch(err => {
+      console.error('Microphone access error:', err);
+    });
+}
+
+recordButton.addEventListener('click', () => {
+  if (!mediaRecorder) return;
+
+  if (mediaRecorder.state === 'inactive') {
+    mediaRecorder.start();
+    recordButton.textContent = 'Stop Recording';
+  } else {
+    mediaRecorder.stop();
+    recordButton.textContent = 'Start Recording';
+  }
+});
+
+</script>
 </html>
