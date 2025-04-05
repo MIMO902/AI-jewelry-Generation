@@ -13,7 +13,7 @@ import cookieParser from "cookie-parser";
 // Import routes
 import indexRouter from "./routes/index.rout.js";
 import userrouter from "./routes/user.rout.js";
-// import adminrouter from "./routes/admin.rout.js";
+import adminrouter from "./routes/admin.rout.js";
 
 // Read the current directory name
 const __filename = fileURLToPath(import.meta.url);
@@ -37,7 +37,7 @@ app.use(cors());
 //ROUTES
 app.use("/", indexRouter);
 app.use("/user", userrouter);
-// app.use("/admin", adminrouter);
+app.use("/admin", adminrouter);
 
 // Error Handling handles error in code
 app.use(function (err, req, res, next) {

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/CSS/styleAdmin.css" />
+    <!-- Font Awesome Cdn Link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
+</head>
+
+<body>
+    <%- include("../partials/localization") %>
+        <header class="header">
+            <div class="logo">
+                <a href="#">The Company</a>
+                <div class="search_box">
+                    <input type="text" placeholder="Search">
+                    <i class="fa-sharp fa-solid fa-magnifying-glass"></i>
+                </div>
+            </div>
+
+            <div class="header-icons">
+                <div class="account">
+                    <!-- <img src="./mostafa.jpg" alt=" image "> -->
+                    <h4>Admin</h4>
+                </div>
+            </div>
+        </header>
+        <div class="container">
+            <%- include("../partials/adminnavbar") %>
+
+                <div class="main-body">
+                    <h2>Units</h2>
+                    <div class="promo_card">
+                        <h1>Here you can Add, Edit and Delete Units</h1>
+                        <!-- <span>This is the Admin Dashboard</span> -->
+                    </div>
+                    <div class="history_lists">
+                        <div class="list1">
+                            <div class="row">
+                                <h4>Units</h4>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Unit Name</th>
+                                        <th>Location</th>
+                                        <th>Price</th>
+                                        <th>Edit</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (Image.length> 0){%>
+                                        <%count=1;%>
+                                            <%Image.forEach(img=>{%>
+                                                <tr>
+                                                    <td>
+                                                        <%=count%>
+                                                    </td>
+                                                    <td>
+                                                        <img class="designimg" src="data:image/png;base64,<%- img.imageData%>" alt="Jewelry Design">
+                                                    </td>
+                                                    <td>
+                                                        <%=img.promt%>
+                                                    </a>
+                                                    </td>
+                                                    <td>
+                                                        <%=img.wieght%>
+                                                    </td>
+                                                    <td>
+                                                        <%=img.price%>
+                                                    </td>
+                                                    <td><a href="/admin/delimg/<%=img.id%>">Delete</a></td>
+                                                </tr>
+                                                <%count++;%>
+                                                    <%});%>
+                                                        <%}else{%>
+                                                            <p>there are no properties to show</p>
+                                                            <%}%>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+
+</body>
+
+</html>
