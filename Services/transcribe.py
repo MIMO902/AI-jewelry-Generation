@@ -1,5 +1,9 @@
 import sys
 import whisper
+import io
+
+# Fix for UnicodeEncodeError on Windows (especially with Arabic)
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 def transcribe_audio(audio_path):
     try:
@@ -16,4 +20,3 @@ if __name__ == "__main__":
     audio_path = sys.argv[1]
     transcription = transcribe_audio(audio_path)
     print(transcription)
-

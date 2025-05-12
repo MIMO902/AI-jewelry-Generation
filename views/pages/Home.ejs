@@ -11,101 +11,171 @@
 
 <body>
   <%- include("../partials/navbar") %>
-  <main>
-    <h2>Generate Your Jewelry Design</h2>
-    <div class="input-container">
-      <form action="/user/generate" method="post" enctype="multipart/form-data">
-        <input type="text" name="prompt" id="prompt" placeholder="Enter your design prompt here...">
-        <input class="gen-button" type="submit" value="Generate Designs">
-      </form>
-    </div>
-    <h3>Your Generated Designs</h3>
-    <div class="gallery">
-      <% if (generated_images) { %>
-        <% generated_images.forEach((image, index) => { %>
-          <div class="design">
-            <img id="img-<%= index %>" src="data:image/png;base64,<%- image.imageData %>" alt="Jewelry Design">
-            <div class="button-container">
-              <form action="/user/save_image/<%= image.id %>" method="post">
-                <input class="save-button" type="submit" value="Save">
-              </form>
-              <button class="edit-button" data-image="<%- image.imageData %>" data-index="<%= index %>">Edit</button>
+    <main>
+      <h2>Generate Your Jewelry Design</h2>
+      <div class="input-container">
+        <form action="/user/generate" method="post" enctype="multipart/form-data">
+          <input type="text" name="prompt" id="prompt" placeholder="Enter your design prompt here...">
+          <button type="button" id="startBtn">🎤 Start Recording</button>
+          <button type="button" id="stopBtn" disabled>🛑 Stop Recording</button>
+          <p id="status">Click "Start" to speak...</p>
+
+          <input class="gen-button" type="submit" value="Generate Designs">
+        </form>
+      </div>
+      <h3>Your Generated Designs</h3>
+      <div class="gallery">
+        <% if (generated_images) { %>
+          <% generated_images.forEach((image, index)=> { %>
+            <div class="design">
+              <img id="img-<%= index %>" src="data:image/png;base64,<%- image.imageData %>" alt="Jewelry Design">
+              <div class="button-container">
+                <form action="/user/save_image/<%= image.id %>" method="post">
+                  <input class="save-button" type="submit" value="Save">
+                </form>
+                <button class="edit-button" data-image="<%- image.imageData %>" data-index="<%= index %>">Edit</button>
+              </div>
             </div>
+            <% }) %>
+              <% } else { %>
+                <p>No designs generated yet.</p>
+                <% } %>
+      </div>
+    </main>
+
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <div id="editError" style="color: red; display: none;"></div>
+        <span class="close-buttons" onclick="closeModal()">&times;</span>
+        <button id="startMask">Start Inpainting</button>
+        <button id="redoMask">Redo</button>
+        <button id="endMask">End</button>
+        <div class="image-container" style="position: relative;">
+          <img id="modalImage" src="" alt="Jewelry Design">
+          <canvas id="overlayCanvas"></canvas>
+          <canvas id="maskCanvas"></canvas>
+        </div>
+        <textarea id="editPrompt" placeholder="Enter your edit prompt here..."></textarea>
+        <button id="applyChanges" class="modal-save-button">Apply Changes</button>
+
+        <div class="preview-container">
+          <div class="preview-box">
+            <p>Original Preview</p>
+            <img id="originalPreview" class="preview-img" />
           </div>
-        <% }) %>
-      <% } else { %>
-        <p>No designs generated yet.</p>
-      <% } %>
-    </div>
-  </main>
-
-  <div id="editModal" class="modal">
-    <div class="modal-content">
-      <div id="editError" style="color: red; display: none;"></div>
-      <span class="close-buttons" onclick="closeModal()">&times;</span>
-      <button id="startMask">Start Inpainting</button>
-      <button id="redoMask">Redo</button>
-      <button id="endMask">End</button>
-      <div class="image-container" style="position: relative;">
-        <img id="modalImage" src="" alt="Jewelry Design">
-        <canvas id="overlayCanvas"></canvas>
-        <canvas id="maskCanvas"></canvas>        
-      </div>
-      <textarea id="editPrompt" placeholder="Enter your edit prompt here..."></textarea>
-      <button id="applyChanges" class="modal-save-button">Apply Changes</button>
-
-      <div class="preview-container">
-        <div class="preview-box">
-          <p>Original Preview</p>
-          <img id="originalPreview" class="preview-img" />
-        </div>
-        <div class="preview-box">
-          <p>Mask Preview</p>
-          <img id="maskPreview" class="preview-img" />
+          <div class="preview-box">
+            <p>Mask Preview</p>
+            <img id="maskPreview" class="preview-img" />
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    document.getElementById('startMask').addEventListener('click', () => {
-      document.getElementById('maskCanvas').style.pointerEvents = 'auto';
-      document.getElementById('startMask').disabled = true;
-      document.getElementById('endMask').disabled = false;
-    });
+    <script>
+      document.getElementById('startMask').addEventListener('click', () => {
+        document.getElementById('maskCanvas').style.pointerEvents = 'auto';
+        document.getElementById('startMask').disabled = true;
+        document.getElementById('endMask').disabled = false;
+      });
 
-    document.getElementById('endMask').addEventListener('click', () => {
-      document.getElementById('maskCanvas').style.pointerEvents = 'none';
-      document.getElementById('startMask').disabled = false;
-      document.getElementById('endMask').disabled = true;
-    });
+      document.getElementById('endMask').addEventListener('click', () => {
+        document.getElementById('maskCanvas').style.pointerEvents = 'none';
+        document.getElementById('startMask').disabled = false;
+        document.getElementById('endMask').disabled = true;
+      });
 
-    function openModal(imageData, index) {
-      const modal = document.getElementById('editModal');
-      const modalImage = document.getElementById('modalImage');
-      modal.dataset.index = index;
-      modalImage.src = `data:image/png;base64,${imageData}`;
-      modal.style.display = 'flex';
+      function openModal(imageData, index) {
+        const modal = document.getElementById('editModal');
+        const modalImage = document.getElementById('modalImage');
+        modal.dataset.index = index;
+        modalImage.src = `data:image/png;base64,${imageData}`;
+        modal.style.display = 'flex';
 
-      modalImage.onload = () => {
-        const canvas = document.getElementById('maskCanvas');
-        canvas.width = modalImage.naturalWidth;
-        canvas.height = modalImage.naturalHeight;
-      };
-    }
-
-    function closeModal() {
-      document.getElementById('editModal').style.display = 'none';
-    }
-
-    document.querySelector('.gallery').addEventListener('click', (e) => {
-      if (e.target.classList.contains('edit-button')) {
-        const imageData = e.target.dataset.image;
-        const index = e.target.dataset.index;
-        openModal(imageData, index);
+        modalImage.onload = () => {
+          const canvas = document.getElementById('maskCanvas');
+          canvas.width = modalImage.naturalWidth;
+          canvas.height = modalImage.naturalHeight;
+        };
       }
-    });
-  </script>
+
+      function closeModal() {
+        document.getElementById('editModal').style.display = 'none';
+      }
+
+      document.querySelector('.gallery').addEventListener('click', (e) => {
+        if (e.target.classList.contains('edit-button')) {
+          const imageData = e.target.dataset.image;
+          const index = e.target.dataset.index;
+          openModal(imageData, index);
+        }
+      });
+    </script>
+    <script>
+      let mediaRecorder;
+      let audioChunks = [];
+
+      document.getElementById("startBtn").addEventListener("click", async () => {
+        const status = document.getElementById("status");
+        audioChunks = [];
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          document.getElementById("startBtn").disabled = true;
+          document.getElementById("stopBtn").disabled = false;
+
+          mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
+          };
+
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const formData = new FormData();
+            formData.append("audio", audioBlob, "recording.webm");
+
+            status.textContent = "Uploading for transcription...";
+
+            try {
+              const response = await fetch("/user/transcribe", {
+                method: "POST",
+                body: formData
+              });
+
+              const data = await response.json();
+              console.log("📥 Transcription result:", data);
+
+              if (data.transcript) {
+                document.getElementById("prompt").value = data.transcript;
+                status.textContent = "✅ Transcription complete!";
+              } else {
+                status.textContent = "⚠️ No transcription result.";
+              }
+            } catch (error) {
+              console.error("❌ Transcription error:", error);
+              status.textContent = "❌ Error during transcription.";
+            }
+
+            document.getElementById("startBtn").disabled = false;
+            document.getElementById("stopBtn").disabled = true;
+          };
+
+          mediaRecorder.start();
+          status.textContent = "🎙️ Recording... Press Stop when done.";
+        } catch (err) {
+          console.error("Microphone access error:", err);
+          status.textContent = "❌ Microphone access denied.";
+        }
+      });
+
+      document.getElementById("stopBtn").addEventListener("click", () => {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+          mediaRecorder.stop();
+          document.getElementById("status").textContent = "⏳ Stopped. Transcribing...";
+        }
+      });
+    </script>
+
+
 </body>
 
 </html>

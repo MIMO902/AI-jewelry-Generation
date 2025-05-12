@@ -22,67 +22,65 @@ ffmpeg.setFfmpegPath("C:/Users/youssef/Downloads/ffmpeg-7.1-essentials_build/ffm
 
 const router = Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Define the folder where files will be saved
-    cb(null, 'uploads/'); // Make sure 'uploads' exists or create it
-  },
-  filename: (req, file, cb) => {
-    // Define the filename (you can customize it here)
-    cb(null, Date.now() + path.extname(file.originalname)); // Add file extension
+router.post("/transcribe", async (req, res) => {
+  try {
+    console.log("🔔 Received transcription request");
+
+    if (!req.files || !req.files.audio) {
+      console.log("⚠️ No audio file uploaded");
+      return res.status(400).json({ error: "No audio file uploaded" });
+    }
+
+    const audioFile = req.files.audio;
+    const uploadPath = `./uploads/${Date.now()}_${audioFile.name}`;
+    
+    // Save file
+    await audioFile.mv(uploadPath);
+    console.log("✅ Audio saved at:", uploadPath);
+
+    const pythonScript = 'services/transcribe.py';
+    console.log("🐍 Running Python script:", pythonScript);
+
+    const pythonProcess = spawn('python', [pythonScript, uploadPath]);
+
+    let transcription = '';
+    let errorOutput = '';
+
+    pythonProcess.stdout.on('data', (data) => {
+      console.log("📥 Python output:", data.toString());
+      transcription += data.toString();
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      console.error("❌ Python error:", data.toString());
+      errorOutput += data.toString();
+    });
+
+    pythonProcess.on('close', (code) => {
+      console.log("🧾 Python process exited with code:", code);
+
+      // Cleanup
+      fs.unlink(uploadPath, () => {
+        console.log("🧹 Deleted temp file:", uploadPath);
+      });
+
+      if (code === 0 && transcription.trim() !== "") {
+        console.log("✅ Transcription success:", transcription.trim());
+        res.json({ transcript: transcription.trim() });
+      } else {
+        console.error("❌ Transcription failed. Output:", transcription, "Error:", errorOutput);
+        res.status(500).json({ transcript: "", error: "No text transcribed", debug: errorOutput });
+      }
+    });
+
+  } catch (err) {
+    console.error("💥 Server error during transcription:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Initialize multer with the storage configuration
-const upload = multer({ storage: storage });
 
-//   router.post('/transcribe', async (req, res) => {
-//     // Create a new Formidable instance (Updated for v2.x)
-//     const form = new formidable.Formidable({
-//       uploadDir:'../uploads',  // Directory to save the uploaded file
-//       keepExtensions: true,  // Keep the file extension
-//     });
 
-//     form.parse(req, async (err, fields, files) => {
-//       if (err) {
-//         console.error("Error parsing form:", err);
-//         return res.status(400).json({ error: "File upload failed." });
-//       }
-
-//       // Extract the file path of the uploaded audio file
-//       const audioPath = files.audio[0].filepath;
-//       console.log("File received at:", audioPath);
-
-//       try {
-//         // Run the Python script for transcription
-//         const pythonScript = '../Services/transcribe.py';
-//         const pythonProcess = spawn('python', [pythonScript, audioPath]);
-
-//         let transcription = '';
-//         let errorOutput = '';
-
-//         pythonProcess.stdout.on('data', (data) => {
-//           transcription += data.toString();
-//         });
-
-//         pythonProcess.stderr.on('data', (data) => {
-//           errorOutput += data.toString();
-//         });
-
-//         pythonProcess.on('close', (code) => {
-//           if (code === 0) {
-//             res.json({ transcription: transcription.trim() });
-//           } else {
-//             console.error('Python error output:', errorOutput);
-//             res.status(500).json({ error: 'Transcription failed.', details: errorOutput });
-//           }
-//         });
-//       } catch (error) {
-//         console.error('Error processing transcription:', error);
-//         res.status(500).json({ error: 'Server error occurred.' });
-//       }
-//     });
-//   });
 
 router.post('/save_image/:id', save_image);
 router.get('/Home', function (req, res) {
