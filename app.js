@@ -26,13 +26,19 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 // Middleware
-app.use(fileUpload());
+app.use(fileUpload({ limits: { fileSize: 50 * 1024 * 1024 }, useTempFiles: false }));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(session({ secret: "any secret" }));
 app.use(cors());
+app.use(express.json({ 
+  limit: '50mb', // Increase from default 100kb
+  verify: (req, res, buf) => {
+      req.rawBody = buf.toString();
+  }
+}));
 
 //ROUTES
 app.use("/", indexRouter);

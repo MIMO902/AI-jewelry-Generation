@@ -10,6 +10,7 @@ import User from "../models/user.model.js";
 import StegCloak from 'stegcloak';
 import crypto from 'crypto';
 import translate from 'google-translate-api-x';
+import sizeOf from 'image-size';
 
 // function generateKeys() {
 //   const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
@@ -100,7 +101,7 @@ const generate = async (req, res) => {
     const images = [];
     const views = [];
     console.log(req.session.user);
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 1; i++) {
       const response = await axios.post(SD_API_URL, requestData, {
         headers: { "Content-Type": "application/json" },
       });
@@ -362,35 +363,97 @@ const test_authentication = async (req, res) => {
   }
 };
 
-const SD_edit_API_URL = "http://127.0.0.1:7860/sdapi/v1/img2img";
 const editImage = async (req, res) => {
-  const { image, mask, prompt } = req.body;
-
-  console.log(prompt)
-  const requestData = {
-    prompt,
-    init_images: [image],  // Original image
-    mask: mask,  // Mask image
-    sampler_name: "Euler a",
-    steps: 30,
-    cfg_scale: 7.5,
-    denoising_strength: 0.75, // Controls how much the AI changes the image
-    width: 768,
-    height: 1024,
-  };
-
   try {
-    const response = await axios.post(SD_edit_API_URL, requestData, {
+    console.log("✅ /user/inpaint hit");
+
+    // Validate uploaded files and prompt
+    const imageFile = req.files?.image;
+    const maskFile = req.files?.mask;
+    const prompt = (req.body.prompt || "").trim();
+
+    if (!imageFile || !maskFile || !prompt) {
+      return res.status(400).json({ success: false, error: "Missing image, mask, or prompt" });
+    }
+
+    const imageBuffer = imageFile.data;
+    const maskBuffer = maskFile.data;
+
+    // Validate image dimensions
+    let iw, ih, mw, mh;
+    try {
+      ({ width: iw, height: ih } = await sizeOf(imageBuffer));
+      ({ width: mw, height: mh } = await sizeOf(maskBuffer));
+    } catch (err) {
+      return res.status(400).json({ success: false, error: "Invalid image or mask format" });
+    }
+
+    if (iw !== 768 || ih !== 1024 || mw !== 768 || mh !== 1024) {
+      return res.status(400).json({
+        success: false,
+        error: `Images must be 768x1024. Got image ${iw}x${ih}, mask ${mw}x${mh}`
+      });
+    }
+
+    // Build SD img2img payload
+    const payload = {
+      prompt: `${prompt}, jewelry, high quality, 8k`,
+      negative_prompt: "blurry, low quality, deformed, text, watermark, bad anatomy",
+      init_images: [`data:image/png;base64,${imageBuffer.toString("base64")}`],
+      mask: `data:image/png;base64,${maskBuffer.toString("base64")}`,
+      sampler_name: "Euler a",
+      inpainting_mask_invert: 0,
+      inpainting_fill: 1,
+      steps: 30,
+      cfg_scale: 7.5,
+      denoising_strength: 0.9,
+      width: 768,
+      height: 1024,
+      override_settings: {
+        sd_model_checkpoint: "model.safetensors"
+      }
+    };
+
+    console.log("✅ Sending request to Stable Diffusion...");
+
+    const response = await axios.post("http://127.0.0.1:7860/sdapi/v1/img2img", payload, {
       headers: { "Content-Type": "application/json" },
     });
 
-    const editedImage = response.data.images[0];
-    res.json({ editedImage });
+    if (!response.data?.images?.[0]) {
+      throw new Error("Stable Diffusion did not return an image");
+    }
+
+    console.log("✅ Image edited successfully");
+
+    // Post-process: watermark, sign, save
+    const base64Image = response.data.images[0];
+    const watermarked = await addWatermark(base64Image);
+    const signature = await signImage(watermarked);
+    const savedImage = await add_image(req, signature, watermarked, prompt);
+    req.session.newImageId = savedImage._id;
+    req.session.save(err => {
+      if (err) {
+        console.error("❌ Session save error:", err);
+        return res.status(500).send("Session error");
+      }
+      res.redirect("/user/inpainted-home");
+    });
+
   } catch (error) {
-    console.error("Error editing jewelry image:", error);
-    res.status(500).json({ error: "Failed to edit image" });
+    const sdError = error?.response?.data || {};
+    console.error("🔥 SD ERROR:", sdError);
+    console.error("🔥 Full Error:", error.message);
+
+    res.status(500).json({
+      success: false,
+      error: sdError?.error || error.message || "Inpainting failed"
+    });
   }
 };
+
+
+
 const detectMaterials = (description) => {
   const materials = {
     metals: [],
