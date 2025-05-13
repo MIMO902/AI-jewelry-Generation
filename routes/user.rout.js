@@ -1,23 +1,19 @@
 import { Router } from 'express';
-import express from 'express'
 import { spawn } from 'child_process';
+import { exec } from "child_process";
 import {
   generate,
-  save_image,
   saveddesigns,
   delete_saved_design,
   test_authentication,
   editImage,
 } from "../controllers/generated_img.controller.js";
+import {save_image} from "../controllers/imageSave.controller.js"
 import image from "../models/image.model.js";
-import multer from "multer";
-import { exec } from "child_process";
 import fs from "fs";
 import path from "path";
-import ffmpeg from "fluent-ffmpeg";
-import formidable from 'formidable';
 
-ffmpeg.setFfmpegPath("C:/Users/youssef/Downloads/ffmpeg-7.1-essentials_build/ffmpeg-7.1-essentials_build/bin/ffmpeg.exe");
+import { generateDepthMap } from "../controllers/3d.controller.js";
 
 
 const router = Router();
@@ -80,6 +76,40 @@ router.post("/transcribe", async (req, res) => {
 });
 
 
+// router.post("/generate-depth", generateDepthMap);
+
+router.post("/generate-mesh", async (req, res) => {
+  try {
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ success: false, message: "No image uploaded" });
+    }
+
+    const uploaded = req.files.image;
+    const timestamp = Date.now();
+    const inputPath = `uploads/${timestamp}_input.png`;
+    const depthPath = `public/depth/${timestamp}_depth.png`;
+    const meshPath = `public/models/${timestamp}_mesh.obj`;
+
+    // Save uploaded image
+    await uploaded.mv(inputPath);
+
+    // Run Python script
+    const command = `python services/image_to_mesh.py ${inputPath} ${depthPath} ${meshPath}`;
+    exec(command, (err, stdout, stderr) => {
+
+      if (err) {
+        console.error("Python Error:", stderr || err.message);
+        return res.status(500).json({ success: false, error: "Mesh generation failed." });
+      }
+
+      console.log("Python Output:\n", stdout);
+      return res.json({ success: true, meshFile: `/models/${timestamp}_mesh.obj` });
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+});
 
 
 router.post('/save_image/:id', save_image);

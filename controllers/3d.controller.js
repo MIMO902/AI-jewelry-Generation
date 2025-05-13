@@ -1,10 +1,32 @@
-// import ort from "onnxruntime-node";
-// import fs from "fs";
+import path from "path";
+import fs from "fs";
+import { spawn } from "child_process";
 
-// async function estimateDepth(imageTensor) {
-//     const session = await ort.InferenceSession.create("depth_anything_v2.onnx");
-//     const results = await session.run({ input: imageTensor });
-//     return results.output.data;  // Adjust output key
-// }
+export const generateDepthMap = (req, res) => {
+  if (!req.files || !req.files.image) {
+    return res.status(400).json({ success: false, message: "No image uploaded" });
+  }
 
-// estimateDepth
+  const img = req.files.image;
+  const tempPath = path.join("uploads", Date.now() + "_input.png");
+  const depthPath = path.join("public", "depth", Date.now() + "_depth.png");
+
+  img.mv(tempPath, (err) => {
+    if (err) {
+      console.error("❌ File move error:", err);
+      return res.status(500).json({ success: false, message: "Upload failed" });
+    }
+
+    const process = spawn("python", ["services/depth_estimator.py", tempPath, depthPath]);
+
+    process.on("close", (code) => {
+      fs.unlinkSync(tempPath); // clean up
+
+      if (code === 0) {
+        res.json({ success: true, depthMap: depthPath });
+      } else {
+        res.status(500).json({ success: false, message: "Depth estimation failed" });
+      }
+    });
+  });
+};

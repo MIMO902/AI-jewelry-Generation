@@ -32,11 +32,6 @@ router.get('/deleteuser/:id', (req, res, next) => {
     });
 });
 
-// router.get('/adding', function (req, res, next) {
-//   console.log('index.js: GET /');
-//   res.render('pages/addpropirty', {errors:[], user: (req.session.user === undefined ? "" : req.session.user) });
-// });
-
 router.get('/viewusers', function (req, res, next) {
   const query={"type":'user'};
   User.find(query).then(result => {
@@ -64,8 +59,6 @@ router.post('/makeuser/:id',(req,res,next)=>{
           console.log(err);
       });
 })
-// router.post('/addpropirty', addprop);
-// router.post('/editproperty/:id',edit)
 router.get('/images',viewimages);
 router.get('/viewsaved',viewsaved)
 

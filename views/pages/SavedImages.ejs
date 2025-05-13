@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,31 +8,126 @@
     <link rel="stylesheet" href="/css/savedimages.css">
     <link rel="stylesheet" href="/css/navbar.css">
 </head>
+
 <body>
     <%- include("../partials/navbar") %>
-    
-    <h2>Saved Jewelry Designs</h2>
-    <div class="gallery">
-        <% if(saved.length > 0){%>
-            <% saved.forEach( s =>{%>
-        <div class="design">
-            <form method="post" action="/user/del_saved_design/<%=s.id%>">
-                <input type="submit" class="delete-button" value="X">
-            </form>
-            <img src="data:image/png;base64,<%- s.imageData%>" alt="Jewelry Design">
-            <p><%=s.prompt%></p>
-            <button class="view-button" onclick="openModal('data:image/png;base64,<%- s.imageData%>', '<%=s.wieght%>', '<%=s.price%>','<%=s.description%>')">View Details</button>
+
+        <h2>Saved Jewelry Designs</h2>
+        <div class="gallery">
+            <% if(saved.length> 0){%>
+                <% saved.forEach( s=>{%>
+                    <div class="design">
+                        <form method="post" action="/user/del_saved_design/<%= s.id %>">
+                            <input type="submit" class="delete-button" value="X">
+                        </form>
+                        <img src="data:image/png;base64,<%- s.imageData %>" alt="Jewelry Design">
+                        <p>
+                            <%= s.prompt %>
+                        </p>
+
+                        <button class="view-button"
+                            onclick="openModal('data:image/png;base64,<%- s.imageData %>', '<%= s.wieght %>', '<%= s.price %>', '<%= s.description %>')">View
+                            Details</button>
+
+                        <form onsubmit="return uploadImageForMesh('<%- s.imageData %>')">
+                            <input type="submit" class="view-button" value="Generate 3D Mesh">
+                        </form>
+                    </div>
+
+                    <%})%>
+                        <%} else{%>
+                            <p>you have no saved designs</p>
+                            <%}%>
         </div>
-        <%})%>
-        <%} else{%>
-            <p>you have no saved designs</p>
-            <%}%>
-    </div>
 
-    <%- include("../partials/viewdetails") %>
+        <%- include("../partials/viewdetails") %>
 
-    <footer>
-        <p>&copy; 2023 JewelryJinn. All rights reserved. | <a href="#">Contact Us</a> | <a href="#">Privacy Policy</a></p>
-    </footer>
+            <footer>
+                <p>&copy; 2023 JewelryJinn. All rights reserved. | <a href="#">Contact Us</a> | <a href="#">Privacy
+                        Policy</a></p>
+            </footer>
+
+            <script>
+                function sendTo3DImage(form, base64Data) {
+                    const blob = b64toBlob(base64Data, "image/png");
+                    const file = new File([blob], "image.png", { type: "image/png" });
+                    const formData = new FormData();
+                    formData.append("image", file);
+
+                    fetch("/user/generate-depth", {
+                        method: "POST",
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("3D Depth Map created!");
+                                window.open("/" + data.depthMap, "_blank"); // opens the depth image
+                            } else {
+                                alert("Failed to generate 3D: " + data.message);
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert("3D generation error.");
+                        });
+
+                    return false; // prevent default form submit
+                }
+
+                function b64toBlob(b64Data, contentType = "", sliceSize = 512) {
+                    const byteCharacters = atob(b64Data);
+                    const byteArrays = [];
+
+                    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                        const slice = byteCharacters.slice(offset, offset + sliceSize);
+                        const byteNumbers = new Array(slice.length);
+                        for (let i = 0; i < slice.length; i++) {
+                            byteNumbers[i] = slice.charCodeAt(i);
+                        }
+                        byteArrays.push(new Uint8Array(byteNumbers));
+                    }
+
+                    return new Blob(byteArrays, { type: contentType });
+                }
+            </script>
+            <script>
+                function uploadImageForMesh(base64) {
+                    const blob = b64toBlob(base64, "image/png");
+                    const file = new File([blob], "jewelry.png", { type: "image/png" });
+                    const formData = new FormData();
+                    formData.append("image", file);
+
+                    fetch("/user/generate-mesh", {
+                        method: "POST",
+                        body: formData
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("Mesh created!");
+                                window.open(data.meshFile, "_blank"); // Open .obj in browser or download
+                            } else {
+                                alert("Failed: " + data.message);
+                            }
+                        });
+
+                    return false;
+                }
+
+                function b64toBlob(b64Data, contentType = "image/png") {
+                    const byteCharacters = atob(b64Data);
+                    const byteArrays = [];
+                    for (let i = 0; i < byteCharacters.length; i += 512) {
+                        const slice = byteCharacters.slice(i, i + 512);
+                        const byteNumbers = Array.from(slice, c => c.charCodeAt(0));
+                        byteArrays.push(new Uint8Array(byteNumbers));
+                    }
+                    return new Blob(byteArrays, { type: contentType });
+                }
+            </script>
+
+
 </body>
+
 </html>
