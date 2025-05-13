@@ -10,11 +10,14 @@ function startService(name, cmd, args, cwd) {
   proc.on("exit", code => console.log(`[${name}] exited with code ${code}`));
 }
 
-// 1. Start Stable Diffusion (WebUI)
-startService("SD", "python", ["launch.py", "--api"], "D:/stable-diffusion-webui");
+// // 1. Start Stable Diffusion (WebUI)
+// startService("SD", "python", ["launch.py", "--api"], "D:/stable-diffusion-webui");
 
-// 2. Start CLIP similarity server
-startService("CLIP", "python", ["services/clip_server.py"], process.cwd());
+// // 2. Start CLIP similarity server
+// startService("CLIP", "python", ["services/clip_server.py"], process.cwd());
 
 // 3. Start your Node.js app
 startService("NodeApp", "npm", ["run", "dev"], process.cwd());
+
+// 4. Start React frontend (Vite)
+startService("React", "npm", ["run", "dev"], path.join(process.cwd(), "client"));

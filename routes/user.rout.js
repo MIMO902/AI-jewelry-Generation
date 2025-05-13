@@ -93,23 +93,31 @@ router.post("/generate-mesh", async (req, res) => {
     // Save uploaded image
     await uploaded.mv(inputPath);
 
-    // Run Python script
-    const command = `python services/image_to_mesh.py ${inputPath} ${depthPath} ${meshPath}`;
-    exec(command, (err, stdout, stderr) => {
+    // Run Python script using spawn
+    const python = spawn('python', [
+      'services/image_to_mesh.py',
+      inputPath,
+      depthPath,
+      meshPath,
+    ], {
+      stdio: 'inherit' // Shows live Python output in your server logs
+    });
 
-      if (err) {
-        console.error("Python Error:", stderr || err.message);
+    python.on('close', (code) => {
+      if (code !== 0) {
+        console.error(`❌ Python exited with code ${code}`);
         return res.status(500).json({ success: false, error: "Mesh generation failed." });
       }
 
-      console.log("Python Output:\n", stdout);
       return res.json({ success: true, meshFile: `/models/${timestamp}_mesh.obj` });
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Server error." });
   }
 });
+
 
 
 router.post('/save_image/:id', save_image);

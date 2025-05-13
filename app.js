@@ -4,9 +4,6 @@ import { fileURLToPath } from "url";
 import logger from "morgan";
 import session from "express-session";
 import cors from "cors";
-
-
-
 import fileUpload from "express-fileupload";
 import cookieParser from "cookie-parser";
 
@@ -21,7 +18,7 @@ const __dirname = dirname(__filename);
 
 const app = express();
 
-// View engine setup
+// View engine setup for EJS
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
@@ -34,18 +31,25 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(session({ secret: "any secret" }));
 app.use(cors());
 app.use(express.json({ 
-  limit: '50mb', // Increase from default 100kb
+  limit: '50mb',
   verify: (req, res, buf) => {
       req.rawBody = buf.toString();
   }
 }));
 
-//ROUTES
+// Routes for EJS pages
 app.use("/", indexRouter);
 app.use("/user", userrouter);
 app.use("/admin", adminrouter);
 
-// Error Handling handles error in code
+// ✅ Serve React (Vite Build) from "/react/*"
+app.use("/react", express.static(path.join(__dirname, "client", "dist")));
+
+app.get("/react/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+});
+
+// Error Handling
 app.use(function (err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
@@ -53,13 +57,11 @@ app.use(function (err, req, res, next) {
   res.render("pages/error");
 });
 
-// 404 page if ml2ash el page
+// 404 for unmatched routes
 app.use((req, res) => {
-  res
-    .status(404)
-    .render("pages/404", {
-      user: req.session.user === undefined ? "" : req.session.user,
-    });
+  res.status(404).render("pages/404", {
+    user: req.session.user === undefined ? "" : req.session.user,
+  });
 });
 
 export default app;
