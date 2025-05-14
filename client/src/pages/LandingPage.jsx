@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Layout from "../Components/Layout/Layout";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
-import backgroundImage from "@/assets/background.png";
+import backgroundImage from "../assets/background.png";
 import {
   FaMicrophone,
   FaArrowLeft,

@@ -15,10 +15,12 @@
     "@tailwindcss/postcss": "^4.1.6",
     "clsx": "^2.1.1",
     "init": "^0.1.2",
+    "keen-slider": "^6.8.6",
     "lucide-react": "^0.510.0",
     "npx": "^10.2.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^6.30.0",
     "shadcn": "^2.5.0",
     "tailwind-variants": "^1.0.0"
