@@ -18,6 +18,3 @@ function startService(name, cmd, args, cwd) {
 
 // 3. Start your Node.js app
 startService("NodeApp", "npm", ["run", "dev"], process.cwd());
-
-// 4. Start React frontend (Vite)
-startService("React", "npm", ["run", "dev"], path.join(process.cwd(), "client"));

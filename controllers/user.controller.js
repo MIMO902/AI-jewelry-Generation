@@ -27,21 +27,20 @@ class UserController {
     async signup(req, res) {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.render("pages/signup", {
-                title: "Signup page - Validation Failed",
-                errors: errors.array(),
-            });
+            const msg = encodeURIComponent(errors.array().map(e => e.msg).join(' | '));
+            return res.redirect(`/signup?error=${msg}`);
         }
+
         try {
             const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
             const existingUser = await User.findOne({ username: req.body.username });
             const existingEmail = await User.findOne({ email: req.body.email });
 
             if (existingEmail) {
-                return res.send("Email already exists");
+                return res.redirect("/signup?error=" + encodeURIComponent("Email already exists"));
             }
             if (existingUser) {
-                return res.send("Username already exists");
+                return res.redirect("/signup?error=" + encodeURIComponent("Username already exists"));
             }
 
             const newUser = new User({
@@ -59,25 +58,21 @@ class UserController {
             res.redirect("/user/Home");
         } catch (error) {
             console.error(error);
-            res.send("An error occurred");
+            res.redirect("/signup?error=" + encodeURIComponent("An error occurred"));
         }
     }
+
 
     async login(req, res) {
         try {
             const existingUser = await User.findOne({ username: req.body.logusername });
             if (!existingUser) {
-                return res.render("pages/login", {
-                    title: "Login page - Validation Failed",
-                    errors: "Username does not exist",
-                });
+                return res.redirect("/login?error=Username%20does%20not%20exist");
             }
+
             const isPasswordValid = await bcrypt.compare(req.body.logpassword, existingUser.password);
             if (!isPasswordValid) {
-                return res.render("pages/login", {
-                    title: "Login page - Validation Failed",
-                    errors: "Wrong password",
-                });
+                return res.redirect("/login?error=Wrong%20password");
             }
 
             req.session.user = existingUser;

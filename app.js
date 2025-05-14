@@ -30,25 +30,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(session({ secret: "any secret" }));
 app.use(cors());
-app.use(express.json({ 
-  limit: '50mb',
-  verify: (req, res, buf) => {
-      req.rawBody = buf.toString();
-  }
-}));
 
 // Routes for EJS pages
 app.use("/", indexRouter);
 app.use("/user", userrouter);
 app.use("/admin", adminrouter);
 
-// ✅ Serve React (Vite Build) from "/react/*"
-app.use("/react", express.static(path.join(__dirname, "client", "dist")));
+app.use(express.static(path.join(__dirname, "client", "dist")));
 
-app.get("/react/*", (req, res) => {
+app.get(["/", "/login", "/signup", "/landingpage"], (req, res) => {
   res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
 });
-
 // Error Handling
 app.use(function (err, req, res, next) {
   res.locals.message = err.message;
