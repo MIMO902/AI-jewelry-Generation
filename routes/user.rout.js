@@ -121,14 +121,6 @@ router.post("/generate-mesh", async (req, res) => {
 
 
 router.post('/save_image/:id', save_image);
-router.get('/Home', function (req, res) {
-  console.log('🟢 Rendering Home Page...');
-  res.render('pages/Home', {
-    title: "Home",
-    generated_images: null,
-    user: req.session.user || ""
-  });
-});
 router.get("/inpainted-home", async (req, res) => {
   const imageId = req.session.newImageId;
   req.session.newImageId = null;

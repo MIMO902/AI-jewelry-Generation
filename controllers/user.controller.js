@@ -76,7 +76,7 @@ class UserController {
             }
 
             req.session.user = existingUser;
-            res.redirect(existingUser.type === "admin" ? "/admin" : "/user/Home");
+            res.redirect(existingUser.type === "admin" ? "/admin" : "/LandingPage");
         } catch (error) {
             console.error(error);
             res.send("An error occurred");

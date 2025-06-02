@@ -86,7 +86,7 @@ const generate = async (req, res) => {
     const images = [];
     const views = [];
     console.log(req.session.user);
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 3; i++) {
       const response = await axios.post(SD_API_URL, requestData, {
         headers: { "Content-Type": "application/json" },
       });
@@ -106,10 +106,10 @@ const generate = async (req, res) => {
       // console.log(image)
       images.push(image);
     }
-    res.render("pages/home", {
+    res.status(200).json({
       title: "home - generated",
       generated_images: images,
-      user: req.session.user === undefined ? "" : req.session.user,
+      user: req.session.user || "",
     });
   } catch (error) {
     console.error("Error generating jewelry images:", error);
@@ -197,12 +197,6 @@ const add_image = async (req, sign, inputImage, Prompt) => {
 };
 const save_image = async (req, res) => {
   console.log("i am in the save fun");
-
-  if (!req.session.user) {
-    return res.redirect("/");
-  }
-
-
   try {
     const existingImage = await image.findOne({ _id: req.params.id });
     const exsistingsave = await save_design.findOne({

@@ -43,33 +43,7 @@
       </div>
     </main>
 
-    <div id="editModal" class="modal">
-      <div class="modal-content">
-        <div id="editError" style="color: red; display: none;"></div>
-        <span class="close-buttons" onclick="closeModal()">&times;</span>
-        <button id="startMask">Start Inpainting</button>
-        <button id="redoMask">Redo</button>
-        <button id="endMask">End</button>
-        <div class="image-container" style="position: relative;">
-          <img id="modalImage" src="" alt="Jewelry Design">
-          <canvas id="overlayCanvas"></canvas>
-          <canvas id="maskCanvas"></canvas>
-        </div>
-        <textarea id="editPrompt" placeholder="Enter your edit prompt here..."></textarea>
-        <button id="applyChanges" class="modal-save-button">Apply Changes</button>
-
-        <div class="preview-container">
-          <div class="preview-box">
-            <p>Original Preview</p>
-            <img id="originalPreview" class="preview-img" />
-          </div>
-          <div class="preview-box">
-            <p>Mask Preview</p>
-            <img id="maskPreview" class="preview-img" />
-          </div>
-        </div>
-      </div>
-    </div>
+    
 
     <script>
       document.getElementById('startMask').addEventListener('click', () => {

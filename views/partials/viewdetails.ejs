@@ -4,16 +4,16 @@
         <img id="modalImage" src="" alt="Jewelry Design">
         <p  class="popup-text"    id="modalGrams"></p>
         <p  class="popup-text"   id="modalPrice"></p>
-        <p  class="popup-text"   id="description"></p>
+        <!-- <p  class="popup-text"   id="description"></p> -->
     </div>
 </div>
 
 <script>
-    function openModal(imageSrc, grams, estimatePrice,description) {
+    function openModal(imageSrc, grams, estimatePrice) {
         document.getElementById("modalImage").src = imageSrc;
         document.getElementById("modalGrams").innerText = "Weight: " + grams + " grams";
         document.getElementById("modalPrice").innerText = "Estimated Price: $" + estimatePrice;
-        document.getElementById("description").innerText = "description:" + description;
+        // document.getElementById("description").innerText = "description:" + description;
         document.getElementById("editModal").style.display = "flex";
     }
 

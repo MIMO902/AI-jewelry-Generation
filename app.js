@@ -38,7 +38,7 @@ app.use("/admin", adminrouter);
 
 app.use(express.static(path.join(__dirname, "client", "dist")));
 
-app.get(["/", "/login", "/signup", "/landingpage"], (req, res) => {
+app.get(["/", "/login", "/signup", "/LandingPage","/gallery"], (req, res) => {
   res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
 });
 // Error Handling
