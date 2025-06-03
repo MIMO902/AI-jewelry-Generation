@@ -230,6 +230,7 @@ const save_image = async (req, res) => {
       existingImage.description = JSON.stringify(breakdown);
       existingImage.wieght = totalWeight;
       existingImage.price = totalPrice;
+      existingImage.clip_des = description;
 
       // (Optional) Store breakdown in another field or JSON string
       // existingImage.materialBreakdown = JSON.stringify(analysis.breakdown);
@@ -244,36 +245,24 @@ const save_image = async (req, res) => {
 };
 
 const saveddesigns = async (req, res) => {
-  console.log(req.session.user);
-  var query = { _id: req.params.id };
+    const user = req.session.user;
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
   const arr = [];
-  User.find(query)
-    .then((result1) => {
-      save_design
-        .find({ userid: req.params.id })
-        .then(async (result) => {
-          console.log(result);
-          if (result.length > 0) {
-            for (var i = 0; i < result.length; i++) {
-              const saveddesign = await image.findOne({
-                _id: result[i].imageid,
-              });
-              arr[i] = saveddesign;
-              // await saveAndUnlinkImage(saveddesign.imageData,saveddesign.id)
-            }
-          }
-          res.render("pages/savedimages", {
-            saved: arr,
-            user: req.session.user === undefined ? "" : req.session.user,
-          });
-        })
-        .catch((err1) => {
-          console.log(err1);
-        });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+
+  try {
+    const savedItems = await save_design.find({ userid: user._id });
+
+    for (let i = 0; i < savedItems.length; i++) {
+      const design = await image.findOne({ _id: savedItems[i].imageid });
+      if (design) arr.push(design);
+    }
+
+    res.status(200).json({ saved: arr , user: user});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 };
 const delete_saved_design = async (req, res) => {
   console.log("i am inside delete function");

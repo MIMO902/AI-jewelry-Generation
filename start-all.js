@@ -14,7 +14,7 @@ function startService(name, cmd, args, cwd) {
 startService("SD", "python", ["launch.py", "--api"], "D:/stable-diffusion-webui");
 
 // // 2. Start CLIP similarity server
-startService("CLIP", "python", ["services/clip_server.py"], process.cwd());
+// startService("CLIP", "python", ["services/clip_server.py"], process.cwd());
 
 // 3. Start your Node.js app
 startService("NodeApp", "npm", ["run", "dev"], process.cwd());

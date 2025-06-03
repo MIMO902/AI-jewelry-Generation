@@ -150,7 +150,7 @@ router.get("/inpainted-home", async (req, res) => {
 router.post("/inpaint", editImage); // No multer
 
 
-router.get('/SavedImages/:id', saveddesigns);
+router.get('/SavedImages', saveddesigns);
 router.post('/del_saved_design/:id', delete_saved_design);
 router.post('/generate', generate);
 router.get('/auth', test_authentication);

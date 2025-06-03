@@ -5,6 +5,9 @@ import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import LandingPage from "./pages/LandingPage";
 import SavedDesign from "./pages/SavedDesigns";
+import Profile from "./pages/Profile";
+import AdminHome from './pages/AdminHome';
+import EditDesignPage from './pages/EditDesignPage'
 
 export default function App() {
   return (
@@ -15,6 +18,8 @@ export default function App() {
       <Route path="/LandingPage" element={<LandingPage />} />
       <Route path="/gallery" element={<SavedDesign />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/admin" element={<AdminHome />} />
+      <Route path="/edit" element={<EditDesignPage />} />
 
     </Routes>
   );

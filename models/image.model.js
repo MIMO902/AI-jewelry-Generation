@@ -39,6 +39,10 @@ const imageschema = new mongoose.Schema(
     description:{
       type: String,
       require:false
+    },
+    clip_des:{
+      type: String,
+      require:false
     }
   },
   { timestamps: true }

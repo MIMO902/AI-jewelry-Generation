@@ -39,11 +39,11 @@ const Card = ({ cardData, showSave = true }) => {
   };
 
 
-  const handleEdit = (e) => {
-    e.stopPropagation();
-    console.log('Edit clicked for:', cardData);
-    alert('Edit feature coming soon!');
-  };
+ const handleEdit = (e) => {
+  e.stopPropagation();
+  navigate('/edit', { state: { imageData: image } });
+};
+
 
   return (
     <StyledWrapper>

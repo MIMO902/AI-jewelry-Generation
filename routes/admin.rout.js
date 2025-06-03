@@ -18,7 +18,7 @@ router.use((req, res, next) => {
   }
 });
 
-router.get('/', getalluser);
+// router.get('/', getalluser);
 router.get('/delimg/:id',deleteimg);
 // router.get('/editprop/:id',getprop)
 router.get('/deleteuser/:id', (req, res, next) => {

@@ -2,34 +2,49 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 
 const Card = ({ cardData, viewMode = 'grid' }) => {
-  const { image, title, rating = 4.5, materials, price, description } = cardData;
+  const {
+    imageData,
+    prompt,
+    rate,
+    price,
+    wieght,
+    description,
+    clip_des
+  } = cardData;
   const [isFlipped, setIsFlipped] = useState(false);
+  // Handle conversions safely
+  const parsedRate = rate ? parseFloat(rate) : null;
+  const parsedPrice = price ? parseFloat(price.toString()) : null;
+  const parsedWeight = wieght ? parseFloat(wieght.toString()) : null;
+
 
   return (
     <StyledCard className={`card ${viewMode}`} onClick={() => setIsFlipped(!isFlipped)}>
       <div className={`card-inner ${isFlipped ? 'flipped' : ''}`}>
         <div className="card-face front">
           <img
-            src={image || 'https://via.placeholder.com/280x220.png?text=Jewelry+Image'}
-            alt={title}
+            src={`data:image/png;base64,${imageData}` || 'https://via.placeholder.com/280x220.png?text=Jewelry+Image'}
+            alt={prompt}
             className="main-image"
           />
+
           <div className="info">
-            <h3>{title}</h3>
+            <h3>{prompt}</h3>
             <div className="rating">
               {[1, 2, 3, 4, 5].map((star) => (
-                <span key={star} className={star <= Math.floor(rating) ? 'filled' : ''}>★</span>
+                <span key={star} className={parsedRate && star <= Math.floor(parsedRate) ? 'filled' : ''}>★</span>
               ))}
-              <span className="value">{rating.toFixed(1)}</span>
+              <span className="value">{parsedRate ? parsedRate.toFixed(1) : 'N/A'}</span>
             </div>
           </div>
         </div>
 
         <div className="card-face back">
           <h4>Details</h4>
-          <p><strong>Materials:</strong> {materials || 'Gold, Diamond'}</p>
-          <p><strong>Estimated Price:</strong> {price || '$2,500'}</p>
-          <p><strong>Description:</strong> {description || 'A beautiful piece of fine craftsmanship.'}</p>
+          <p><strong>materials:</strong> {description || 'A beautiful piece of fine craftsmanship.'}</p>
+          <p><strong>Weight:</strong> {parsedWeight !== null ? `${parsedWeight.toFixed(2)} g` : 'N/A'}</p>
+          <p><strong>Estimated Price:</strong> {parsedPrice !== null ? `$${parsedPrice.toFixed(2)}` : 'N/A'}</p>
+          <p><strong>Description:</strong> {clip_des || 'A beautiful piece of fine craftsmanship.'}</p>
         </div>
       </div>
     </StyledCard>

@@ -1,37 +1,47 @@
-import React, { useState } from 'react';
-import Sidebar from '../Components/Ui/Sidebar';
+import React, { useState, useEffect } from 'react';
+import Sidebar from '../components/ui/Sidebar.jsx';
 import Card from '../Components/Ui/Card2';
 import styled from 'styled-components';
 
 const SavedDesigns = () => {
   const [viewMode, setViewMode] = useState('grid');
+  const [cardsData, setCardsData] = useState([]);
+  const [userdata, setuserdata] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const cardsData = [
-    {
-      id: 1,
-      title: 'Diamond Delight',
-      image: 'https://via.placeholder.com/280x220',
-      materials: 'Diamond, White Gold',
-      price: '$5,000',
-      description: 'Elegant diamond design perfect for formal occasions.'
-    },
-    {
-      id: 2,
-      title: 'Golden Grace',
-      image: 'https://via.placeholder.com/280x220',
-      materials: 'Pure Gold',
-      price: '$3,200',
-      description: 'A classic piece that radiates charm and heritage.'
-    },
-    {
-      id: 3,
-      title: 'Sapphire Dream',
-      image: 'https://via.placeholder.com/280x220',
-      materials: 'Sapphire, Platinum',
-      price: '$4,750',
-      description: 'Deep blue sapphire set in platinum with a royal touch.'
-    }
-  ];
+  useEffect(() => {
+    const fetchSavedDesigns = async () => {
+      try {
+        const res = await fetch('/user/SavedImages', {
+          method: 'GET',
+          credentials: 'include', // include session cookie
+        });
+
+        const data = await res.json();
+        setCardsData(data.saved || []);
+        setuserdata(data.user || [])
+      } catch (err) {
+        console.error("Failed to fetch saved designs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSavedDesigns();
+  }, []);
+  if (loading) {
+    return (
+      <Container>
+        <Sidebar />
+        <MainContent>
+          <Header>
+            <h1>Loading your gallery...</h1>
+            <div className="spinner"></div>
+          </Header>
+        </MainContent>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -39,7 +49,7 @@ const SavedDesigns = () => {
       <MainContent>
         <Header>
           <h1>
-            Welcome to your gallery, <span className="username">USER</span>
+            Welcome to your gallery, <span className="username">{userdata.firstname}</span>
           </h1>
           <p>Here are your saved jewelry designs</p>
           <Toggle>
@@ -49,7 +59,7 @@ const SavedDesigns = () => {
         </Header>
         <CardGrid viewMode={viewMode}>
           {cardsData.map(card => (
-            <Card key={card.id} cardData={card} viewMode={viewMode} />
+            <Card key={card._id} cardData={card} viewMode={viewMode} />
           ))}
         </CardGrid>
       </MainContent>
@@ -65,6 +75,22 @@ const Container = styled.div`
   height: 100vh;
   background-color: #000;
   color: white;
+
+  .spinner {
+  margin: 100px auto;
+  width: 50px;
+  height: 50px;
+  border: 6px solid #fff;
+  border-top: 6px solid gold;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 `;
 
 const MainContent = styled.div`
