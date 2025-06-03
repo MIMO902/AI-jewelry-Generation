@@ -14,6 +14,8 @@ export default function App() {
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/LandingPage" element={<LandingPage />} />
       <Route path="/gallery" element={<SavedDesign />} />
+      <Route path="/profile" element={<Profile />} />
+
     </Routes>
   );
 }
