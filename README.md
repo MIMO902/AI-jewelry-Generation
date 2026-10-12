@@ -50,7 +50,4 @@ Image generation needs a local [Stable Diffusion WebUI](https://github.com/AUTOM
 
 ## Team
 
-Built by a team of four for our graduation project.
-**My part (Mostafa Abdelwahab):** project setup, user authentication (signup/login backend and user model), the image watermarking and RSA signing/verification feature, and saved-images pages.
-
-Teammates: [@youssefsaleh1](https://github.com/youssefsaleh1), [@enani26](https://github.com/enani26), [@mohamed0tamer](https://github.com/mohamed0tamer)
+Designed and developed by **Mostafa Abdelwahab** (lead developer) as a graduation project at Misr International University, with graduation team members [@youssefsaleh1](https://github.com/youssefsaleh1), [@enani26](https://github.com/enani26) and [@mohamed0tamer](https://github.com/mohamed0tamer).
